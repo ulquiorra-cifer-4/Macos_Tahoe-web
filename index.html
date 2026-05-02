@@ -10,32 +10,7 @@
 
   <!-- Desktop -->
   <div id="desktop">
-    <!-- Wallpaper Upload Overlay (shown on first visit) -->
-    <div id="wallpaper-upload-screen" class="wallpaper-screen active">
-      <div class="wallpaper-card">
-        <div class="apple-logo">
-          <svg viewBox="0 0 24 24" fill="white" width="56" height="56">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-          </svg>
-        </div>
-        <h1>macOS Tahoe</h1>
-        <p class="subtitle">Web Emulator</p>
-        <div class="upload-zone" id="uploadZone">
-          <div class="upload-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
-              <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <p class="upload-title">Drop your wallpaper here</p>
-          <p class="upload-sub">or click to browse</p>
-          <p class="upload-formats">PNG · JPG · WEBP · HEIC</p>
-          <input type="file" id="wallpaperInput" accept="image/*" hidden />
-        </div>
-        <button class="skip-btn" id="skipBtn">Use Default Wallpaper</button>
-      </div>
-    </div>
-
-    <!-- Wallpaper Layer -->
+    <!-- Wallpaper Layer — auto-loads wallpaper.jpg from root -->
     <div id="wallpaperLayer"></div>
 
     <!-- Menu Bar -->
