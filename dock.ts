@@ -35,7 +35,7 @@ const DOCK_ICONS: DockIcon[] = [
 const BASE       = 54;   // resting icon size
 const MAX        = 100;  // max magnified size
 const RADIUS     = 240;  // wide bell — 4-5 neighbours wave
-const MAX_LIFT   = 6;    // barely any upward lift — icon grows in place, no gap
+const MAX_LIFT   = 0;    // zero lift — icon grows in place, pill top stays locked
 
 let mouseX     = -9999;
 let isOverDock = false;
