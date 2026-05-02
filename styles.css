@@ -45,65 +45,7 @@ html, body {
   transition: opacity .6s ease;
 }
 
-/* ── Wallpaper Upload Screen ── */
-.wallpaper-screen {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 30% 40%, #1a3a6e 0%, #0d1b2a 60%, #000 100%);
-  z-index: 9999;
-  opacity: 0; pointer-events: none;
-  transition: opacity .5s;
-}
-.wallpaper-screen.active { opacity: 1; pointer-events: all; }
-
-.wallpaper-card {
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-  padding: 48px 56px 40px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 28px;
-  backdrop-filter: blur(40px);
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
-  color: white;
-}
-.apple-logo { margin-bottom: 4px; }
-.wallpaper-card h1 {
-  font-size: 32px; font-weight: 700; letter-spacing: -.5px; color: #fff;
-}
-.wallpaper-card .subtitle {
-  font-size: 15px; color: rgba(255,255,255,0.5); margin-top: -6px; margin-bottom: 8px;
-}
-
-.upload-zone {
-  width: 360px;
-  border: 1.5px dashed rgba(255,255,255,0.3);
-  border-radius: 18px;
-  padding: 36px 24px;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  cursor: pointer;
-  transition: border-color .2s, background .2s;
-}
-.upload-zone:hover {
-  border-color: rgba(255,255,255,0.6);
-  background: rgba(255,255,255,0.06);
-}
-.upload-zone.drag-over {
-  border-color: #0a84ff;
-  background: rgba(10,132,255,0.1);
-}
-.upload-icon { color: rgba(255,255,255,0.5); margin-bottom: 4px; }
-.upload-title { font-size: 15px; font-weight: 500; color: #fff; }
-.upload-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
-.upload-formats { font-size: 11px; color: rgba(255,255,255,0.25); margin-top: 4px; letter-spacing: .5px; }
-
-.skip-btn {
-  margin-top: 8px;
-  background: none; border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.6); font-size: 13px;
-  padding: 8px 24px; border-radius: 20px; cursor: pointer;
-  transition: all .2s;
-}
-.skip-btn:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.4); }
+/* Upload screen removed — wallpaper.jpg loads automatically */
 
 /* ── Menu Bar ── */
 #menuBar {
@@ -238,9 +180,10 @@ html, body {
   height: var(--dock-icon-size);
   border-radius: 22.5%;
   object-fit: cover;
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+  /* width/height animate during magnification, transform for lift & bounce */
+  transition: width 0.12s ease, height 0.12s ease, transform 0.12s ease;
+  will-change: width, height, transform;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
   display: block;
   pointer-events: none;
 }
@@ -252,10 +195,10 @@ html, body {
   border-radius: 22.5%;
   display: flex; align-items: center; justify-content: center;
   font-size: 36px;
-  background: rgba(255,255,255,0.08);
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+  background: rgba(255,255,255,0.1);
+  transition: width 0.12s ease, height 0.12s ease, transform 0.12s ease, font-size 0.12s ease;
+  will-change: width, height, transform;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
   flex-shrink: 0;
 }
 
