@@ -139,12 +139,11 @@ html, body {
 #dock {
   display: flex;
   align-items: flex-end;
-  gap: 5px;
-  padding: 9px 12px 10px;
-  /* glass pill */
+  gap: 4px;
+  padding: 6px 10px 7px;
   background: rgba(220,220,230,0.22);
   border: 0.75px solid rgba(255,255,255,0.45);
-  border-radius: 22px;
+  border-radius: 18px;
   backdrop-filter: blur(48px) saturate(220%) brightness(108%);
   -webkit-backdrop-filter: blur(48px) saturate(220%) brightness(108%);
   box-shadow:
@@ -155,17 +154,19 @@ html, body {
     0 2px 8px rgba(0,0,0,0.30);
   position: relative;
   overflow: visible;
-  /* Lock height — only width breathes as icons magnify */
-  height: 81px;
+  /* base height = icon(44) + pad-top(6) + pad-bottom(7) + dot-space(8) = 65px */
+  height: 65px;
   box-sizing: content-box;
+  /* smooth width expansion as icons magnify */
+  transition: border-radius 0.13s ease;
 }
 
 /* Dock separator */
 .dock-separator {
-  width: 1px; height: 44px;
+  width: 1px; height: 34px;
   background: rgba(255,255,255,0.22);
   align-self: flex-end;
-  margin: 0 3px 8px;
+  margin: 0 2px 8px;
   flex-shrink: 0;
 }
 
@@ -174,13 +175,12 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;   /* always pin to bottom of dock */
+  justify-content: flex-end;
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
   overflow: visible;
-  /* fixed bottom space for dot so icons don't shift down */
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 .dock-icon {
