@@ -183,13 +183,13 @@ html, body {
   height: var(--dock-icon-size);
   border-radius: 22%;
   object-fit: cover;
-  /* smooth magnification — fast in, slightly eased out */
+  /* slow elastic pull — matches friend's dock feel */
   transition:
-    width  0.12s cubic-bezier(0.34, 1.20, 0.64, 1),
-    height 0.12s cubic-bezier(0.34, 1.20, 0.64, 1),
-    transform 0.12s cubic-bezier(0.34, 1.20, 0.64, 1);
+    width     0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
+    height    0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
+    transform 0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0);
   will-change: width, height, transform;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.38));
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.40));
   display: block;
   pointer-events: none;
   flex-shrink: 0;
@@ -204,10 +204,10 @@ html, body {
   font-size: 28px;
   background: rgba(255,255,255,0.13);
   transition:
-    width  0.12s cubic-bezier(0.34, 1.20, 0.64, 1),
-    height 0.12s cubic-bezier(0.34, 1.20, 0.64, 1),
-    transform 0.12s cubic-bezier(0.34, 1.20, 0.64, 1),
-    font-size 0.12s cubic-bezier(0.34, 1.20, 0.64, 1);
+    width     0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
+    height    0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
+    transform 0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
+    font-size 0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0);
   will-change: width, height, transform;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.38));
   flex-shrink: 0;
