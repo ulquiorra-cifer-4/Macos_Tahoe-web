@@ -1,7 +1,7 @@
 "use strict";
 // ============================================================
 //  macOS Tahoe Web Emulator — dock.ts
-//  Real macOS dock: icons grow UP, pill only expands sideways
+//  Magnification engine ported 1:1 from friend's Svelte source
 // ============================================================
 const DOCK_ICONS = [
     { id: "finder", label: "Finder", src: "icons/finder.png", emoji: "🔵", running: true },
@@ -21,20 +21,109 @@ const DOCK_ICONS = [
     { id: "_sep2", label: "", src: "", emoji: "", running: false, separator: true },
     { id: "trash", label: "Trash", src: "icons/trash.png", emoji: "🗑️", running: false },
 ];
-// ── Magnification config ──
-const BASE = 54; // resting icon size
-const MAX = 100; // max magnified size
-const RADIUS = 240; // wide bell — 4-5 neighbours wave
-const MAX_LIFT = 0; // zero lift — icon grows in place, pill top stays locked
-let mouseX = -9999;
-let isOverDock = false;
-let rafPending = false; // rAF throttle — silky 60fps, no jitter
-const dock = document.getElementById("dock");
+// ─────────────────────────────────────────────
+//  Magnification — exact port from DockItem.svelte
+// ─────────────────────────────────────────────
+const BASE_WIDTH = 57.6;
+const DIST_LIMIT = BASE_WIDTH * 6; // 345.6px — huge radius
+const BEYOND = DIST_LIMIT + 1;
+// 7-point interpolation table (from friend's source)
+const DIST_INPUT = [
+    -DIST_LIMIT,
+    -DIST_LIMIT / 1.25,
+    -DIST_LIMIT / 2,
+    0,
+    DIST_LIMIT / 2,
+    DIST_LIMIT / 1.25,
+    DIST_LIMIT,
+];
+const WIDTH_OUTPUT = [
+    BASE_WIDTH,
+    BASE_WIDTH * 1.1,
+    BASE_WIDTH * 1.414,
+    BASE_WIDTH * 2, // 115.2px at cursor center
+    BASE_WIDTH * 1.414,
+    BASE_WIDTH * 1.1,
+    BASE_WIDTH,
+];
+/** Linear interpolation between two values */
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+/** Piecewise linear interpolation — matches popmotion's interpolate() */
+function interpolate(distInput, widthOut, x) {
+    if (x <= distInput[0])
+        return widthOut[0];
+    if (x >= distInput[distInput.length - 1])
+        return widthOut[widthOut.length - 1];
+    for (let i = 0; i < distInput.length - 1; i++) {
+        if (x >= distInput[i] && x <= distInput[i + 1]) {
+            const t = (x - distInput[i]) / (distInput[i + 1] - distInput[i]);
+            return lerp(widthOut[i], widthOut[i + 1], t);
+        }
+    }
+    return widthOut[0];
+}
+function getTargetWidth(dist) {
+    if (Math.abs(dist) > DIST_LIMIT)
+        return BASE_WIDTH;
+    return interpolate(DIST_INPUT, WIDTH_OUTPUT, dist);
+}
+function makeSpring(initial) {
+    return { value: initial, target: initial, velocity: 0 };
+}
+const DAMPING = 0.47;
+const STIFFNESS = 0.12;
+function tickSpring(s) {
+    const force = -STIFFNESS * (s.value - s.target);
+    s.velocity = (s.velocity + force) * (1 - DAMPING); // svelte spring formula
+    s.value += s.velocity;
+    // settled when velocity and displacement are tiny
+    return Math.abs(s.velocity) < 0.01 && Math.abs(s.value - s.target) < 0.1;
+}
+const iconStates = [];
+let mouseX = null;
+// ─────────────────────────────────────────────
+//  Animation loop per icon (exact rAF pattern from source)
+// ─────────────────────────────────────────────
+function animateIcon(state) {
+    // Calculate target width from mouse distance
+    let target = BASE_WIDTH;
+    if (mouseX !== null) {
+        const rect = state.imgEl.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const dist = mouseX - cx;
+        target = getTargetWidth(dist);
+    }
+    state.spring.target = target;
+    const settled = tickSpring(state.spring);
+    // Apply width (height=auto via CSS, aspect ratio preserved)
+    state.imgEl.style.width = state.spring.value + "px";
+    if (!settled) {
+        state.raf = requestAnimationFrame(() => animateIcon(state));
+    }
+}
+function scheduleAll() {
+    iconStates.forEach((state) => {
+        cancelAnimationFrame(state.raf);
+        state.raf = requestAnimationFrame(() => animateIcon(state));
+    });
+}
+function resetAll() {
+    mouseX = null;
+    iconStates.forEach((state) => {
+        state.spring.target = BASE_WIDTH;
+        // let spring animate back
+        state.raf = requestAnimationFrame(() => animateIcon(state));
+    });
+}
 // ─────────────────────────────────────────────
 //  Build Dock
 // ─────────────────────────────────────────────
+const dock = document.getElementById("dock");
 function buildDock() {
     dock.innerHTML = "";
+    iconStates.length = 0;
     DOCK_ICONS.forEach((icon) => {
         if (icon.separator) {
             const sep = document.createElement("div");
@@ -42,24 +131,40 @@ function buildDock() {
             dock.appendChild(sep);
             return;
         }
-        const wrap = document.createElement("div");
-        wrap.className = "dock-icon-wrap" + (icon.running ? " running" : "");
+        const wrap = document.createElement("button");
+        wrap.className = "dock-item" + (icon.running ? " running" : "");
+        wrap.setAttribute("aria-label", icon.label);
         wrap.dataset.id = icon.id;
-        const label = document.createElement("span");
-        label.className = "dock-label";
-        label.textContent = icon.label;
+        // Tooltip
+        const tooltip = document.createElement("p");
+        tooltip.className = "dock-label";
+        tooltip.textContent = icon.label;
+        // Image — falls back to emoji div on error
         const img = new Image();
-        img.className = "dock-icon";
         img.alt = icon.label;
         img.draggable = false;
-        sz(img, BASE);
-        img.onerror = () => img.replaceWith(emojiEl(icon.emoji, BASE));
+        img.style.width = BASE_WIDTH + "px";
+        img.style.height = "auto";
+        img.onerror = () => {
+            const em = document.createElement("div");
+            em.className = "dock-icon-emoji";
+            em.textContent = icon.emoji;
+            em.style.width = BASE_WIDTH + "px";
+            em.style.height = BASE_WIDTH + "px";
+            em.style.fontSize = Math.round(BASE_WIDTH * 0.52) + "px";
+            img.replaceWith(em);
+            state.imgEl = em;
+        };
         img.src = icon.src;
+        const imgWrap = document.createElement("span");
+        imgWrap.appendChild(img);
+        // Running dot
         const dot = document.createElement("div");
         dot.className = "dock-dot";
-        wrap.appendChild(label);
-        wrap.appendChild(img);
+        wrap.appendChild(tooltip);
+        wrap.appendChild(imgWrap);
         wrap.appendChild(dot);
+        // Bounce on click
         wrap.addEventListener("click", () => {
             if (wrap.classList.contains("bouncing"))
                 return;
@@ -67,87 +172,31 @@ function buildDock() {
             wrap.addEventListener("animationend", () => wrap.classList.remove("bouncing"), { once: true });
         });
         dock.appendChild(wrap);
+        const state = {
+            wrap,
+            imgEl: img,
+            spring: makeSpring(BASE_WIDTH),
+            raf: 0,
+        };
+        iconStates.push(state);
     });
-}
-function emojiEl(emoji, size) {
-    const el = document.createElement("div");
-    el.className = "dock-icon-emoji";
-    sz(el, size);
-    el.style.fontSize = Math.round(size * 0.52) + "px";
-    el.textContent = emoji;
-    return el;
-}
-function sz(el, size) {
-    el.style.width = size + "px";
-    el.style.height = size + "px";
 }
 // ─────────────────────────────────────────────
-//  Magnification — soft bell curve, icons lift UP
-//  Dock pill grows only LEFT ↔ RIGHT
+//  Mouse events — dock only
 // ─────────────────────────────────────────────
-function bellSize(dist) {
-    if (dist >= RADIUS)
-        return BASE;
-    // Raised cosine bell — gentle wide falloff like Apple's real dock
-    const t = (Math.cos((dist / RADIUS) * Math.PI) + 1) / 2;
-    // Apply a power curve to soften the shoulders further
-    const smooth = t * t * (3 - 2 * t); // smoothstep — rounder wave
-    return BASE + (MAX - BASE) * smooth;
-}
-function applyMag() {
-    rafPending = false;
-    dock.querySelectorAll(".dock-icon-wrap").forEach((wrap) => {
-        const iconEl = wrap.querySelector(".dock-icon, .dock-icon-emoji");
-        if (!iconEl)
-            return;
-        const r = wrap.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const dist = Math.abs(mouseX - cx);
-        const size = isOverDock ? bellSize(dist) : BASE;
-        const frac = (size - BASE) / (MAX - BASE);
-        sz(iconEl, size);
-        if (iconEl.classList.contains("dock-icon-emoji")) {
-            iconEl.style.fontSize = Math.round(size * 0.52) + "px";
-        }
-        iconEl.style.transform = `translateY(-${frac * MAX_LIFT}px)`;
-    });
-}
-function scheduleMag() {
-    if (rafPending)
-        return;
-    rafPending = true;
-    requestAnimationFrame(applyMag);
-}
-function resetMag() {
-    rafPending = false;
-    dock.querySelectorAll(".dock-icon-wrap").forEach((wrap) => {
-        const iconEl = wrap.querySelector(".dock-icon, .dock-icon-emoji");
-        if (!iconEl)
-            return;
-        sz(iconEl, BASE);
-        if (iconEl.classList.contains("dock-icon-emoji")) {
-            iconEl.style.fontSize = Math.round(BASE * 0.52) + "px";
-        }
-        iconEl.style.transform = "translateY(0)";
-    });
-}
-// Only fire on the dock element — never the whole document
 dock.addEventListener("mouseenter", (e) => {
-    isOverDock = true;
     mouseX = e.clientX;
-    scheduleMag();
+    scheduleAll();
 });
 dock.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
-    scheduleMag();
+    scheduleAll();
 });
 dock.addEventListener("mouseleave", () => {
-    isOverDock = false;
-    mouseX = -9999;
-    resetMag();
+    resetAll();
 });
 // ─────────────────────────────────────────────
-//  Wallpaper — auto-load wallpaper.jpg
+//  Wallpaper
 // ─────────────────────────────────────────────
 const wallpaperLayer = document.getElementById("wallpaperLayer");
 (function () {
@@ -160,7 +209,7 @@ const wallpaperLayer = document.getElementById("wallpaperLayer");
     probe.src = "wallpaper.jpg?" + Date.now();
 })();
 // ─────────────────────────────────────────────
-//  Menu Bar Clock
+//  Clock
 // ─────────────────────────────────────────────
 function updateClock() {
     const el = document.getElementById("menuClock");
@@ -175,7 +224,7 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 10000);
 // ─────────────────────────────────────────────
-//  Calendar Widget
+//  Calendar
 // ─────────────────────────────────────────────
 function buildCalendar() {
     const el = document.getElementById("calendarWidget");
@@ -201,7 +250,7 @@ function buildCalendar() {
     el.innerHTML = h + "</div>";
 }
 // ─────────────────────────────────────────────
-//  Drop PNG onto dock to add live
+//  Drop icon onto dock
 // ─────────────────────────────────────────────
 dock.addEventListener("dragover", (e) => e.preventDefault());
 dock.addEventListener("drop", (e) => {
