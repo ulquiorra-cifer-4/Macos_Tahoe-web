@@ -131,6 +131,8 @@ html, body {
   align-items: flex-end;
   z-index: 200;
   pointer-events: none;
+  will-change: transform;
+  transform: translateY(0%);
 }
 
 #dock {
