@@ -116,141 +116,127 @@ html, body {
 .weather-row span:first-child { font-size: 11px; letter-spacing: .5px; }
 
 /* ═══════════════════════════════════════════
-   DOCK — matches reference screenshot exactly
+   DOCK — ported 1:1 from friend's Svelte source
    ═══════════════════════════════════════════ */
 
 #dockContainer {
   position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5.2rem;
+  padding: 0.4rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
   z-index: 200;
-  overflow: visible;
+  pointer-events: none;
 }
 
 #dock {
+  box-shadow:
+    inset 0 0 0 0.2px rgba(255,255,255,0.7),
+    0 0 0 0.2px rgba(0,0,0,0.7),
+    rgba(0,0,0,0.3) 2px 5px 19px 7px;
+  background-color: rgba(255,255,255,0.25);
+  position: relative;
+  padding: 0.3rem;
+  border-radius: 1.2rem;
+  height: 100%;
   display: flex;
   align-items: flex-end;
-  /* gap matches reference: icons nearly touch, small breathing room */
-  gap: 5px;
-  /* THIN top — pill feels like a sliver above icons */
-  padding: 3px 10px 5px;
-  /* reference glass: warm-tinted, semi-transparent, not too bright */
-  background: rgba(168,165,180,0.30);
-  border: 0.6px solid rgba(255,255,255,0.38);
-  border-radius: 20px;
-  backdrop-filter: blur(32px) saturate(160%) brightness(102%);
-  -webkit-backdrop-filter: blur(32px) saturate(160%) brightness(102%);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.20) inset,
-    0 -1px 0 rgba(0,0,0,0.10) inset,
-    0 6px 28px rgba(0,0,0,0.38),
-    0 1px 4px rgba(0,0,0,0.18);
-  position: relative;
+  pointer-events: auto;
   overflow: visible;
-  /* LOCKED height = base icon(54) + pad-top(3) + pad-bottom(5) + dot(7) = 69px
-     Top edge NEVER moves. Icons grow upward via overflow:visible outside the pill */
-  height: 69px;
-  box-sizing: content-box;
 }
 
-/* Separator line */
+#dock::before {
+  content: '';
+  border-radius: 1.1rem;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: absolute;
+  top: 0; left: 0;
+  z-index: -1;
+}
+
 .dock-separator {
-  width: 1px;
-  height: 30px;
-  background: rgba(255,255,255,0.25);
-  align-self: flex-end;
-  margin: 0 1px 7px;
+  height: 100%;
+  width: 0.2px;
+  background-color: rgba(0,0,0,0.3);
+  margin: 0 4px;
   flex-shrink: 0;
 }
 
-/* Icon wrapper — always pinned to bottom of pill, grows upward via overflow */
-.dock-icon-wrap {
+.dock-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: flex-end;
+  align-items: center;
   position: relative;
+  border-radius: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
   flex-shrink: 0;
   overflow: visible;
-  padding-bottom: 7px;
 }
 
-/* Image icon */
-.dock-icon {
-  width: var(--dock-icon-size);
-  height: var(--dock-icon-size);
-  border-radius: 22%;
-  object-fit: cover;
-  /* slow elastic pull — matches friend's dock feel */
-  transition:
-    width     0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
-    height    0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
-    transform 0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0);
-  will-change: width, height, transform;
-  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.40));
+.dock-item img {
   display: block;
-  pointer-events: none;
-  flex-shrink: 0;
-}
-
-/* Emoji fallback */
-.dock-icon-emoji {
-  width: var(--dock-icon-size);
-  height: var(--dock-icon-size);
+  height: auto;
+  will-change: width;
   border-radius: 22%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px;
-  background: rgba(255,255,255,0.13);
-  transition:
-    width     0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
-    height    0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
-    transform 0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0),
-    font-size 0.28s cubic-bezier(0.23, 1.0, 0.32, 1.0);
-  will-change: width, height, transform;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.38));
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  pointer-events: none;
+}
+
+.dock-icon-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22%;
+  background: rgba(255,255,255,0.15);
+  will-change: width, height;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
   flex-shrink: 0;
 }
 
-/* Running dot — absolute so it never pushes icons */
 .dock-dot {
-  position: absolute;
-  bottom: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px; height: 4px;
+  height: 4px;
+  width: 4px;
+  margin: 2px auto 0;
   border-radius: 50%;
-  background: rgba(255,255,255,0.90);
+  background-color: rgba(255,255,255,0.9);
   opacity: 0;
   transition: opacity .18s;
-  pointer-events: none;
+  flex-shrink: 0;
 }
-.dock-icon-wrap.running .dock-dot { opacity: 1; }
+.dock-item.running .dock-dot { opacity: 1; }
 
-/* Tooltip */
 .dock-label {
+  white-space: nowrap;
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 50%; transform: translateX(-50%);
-  background: rgba(30,30,32,0.92);
-  backdrop-filter: blur(12px);
-  color: #fff;
-  font-size: 13px; font-weight: 500;
-  padding: 5px 12px;
-  border-radius: 8px;
-  white-space: nowrap;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255,255,255,0.5);
+  backdrop-filter: blur(5px);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  box-shadow: rgba(0,0,0,0.3) 0px 1px 5px 2px;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  display: none;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity .14s;
-  border: 0.5px solid rgba(255,255,255,0.08);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.45);
   z-index: 999;
-  letter-spacing: -0.1px;
 }
-.dock-icon-wrap:hover .dock-label { opacity: 1; }
+.dock-item:hover .dock-label { display: block; }
 
-/* Bounce on click */
 @keyframes dock-bounce {
   0%   { transform: translateY(0); }
   28%  { transform: translateY(-20px); }
@@ -259,7 +245,7 @@ html, body {
   86%  { transform: translateY(-1px); }
   100% { transform: translateY(0); }
 }
-.dock-icon-wrap.bouncing .dock-icon,
-.dock-icon-wrap.bouncing .dock-icon-emoji {
-  animation: dock-bounce 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+.dock-item.bouncing img,
+.dock-item.bouncing .dock-icon-emoji {
+  animation: dock-bounce 0.65s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
 }
