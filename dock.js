@@ -170,6 +170,11 @@ function buildDock() {
                 return;
             wrap.classList.add("bouncing", "running");
             wrap.addEventListener("animationend", () => wrap.classList.remove("bouncing"), { once: true });
+            // Open app window if registered
+            const appId = icon.id;
+            if (appId === "trash" && typeof window.openTrashWindow === "function") {
+                window.openTrashWindow();
+            }
         });
         dock.appendChild(wrap);
         const state = {
