@@ -148,8 +148,9 @@ html, body {
     0 1px 4px rgba(0,0,0,0.18);
   position: relative;
   overflow: visible;
-  /* height = icon(54) + pad-top(3) + pad-bottom(5) + dot-zone(7) = 69px */
-  height: 69px;
+  /* min-height based on base icon — pill top rises naturally as icons grow upward
+     no fixed height so the glass always hugs icons with no empty floor gap */
+  min-height: 65px;
   box-sizing: content-box;
 }
 
@@ -231,21 +232,22 @@ html, body {
 /* Tooltip */
 .dock-label {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 8px);
   left: 50%; transform: translateX(-50%);
-  background: rgba(24,24,26,0.88);
-  backdrop-filter: blur(10px);
+  background: rgba(30,30,32,0.92);
+  backdrop-filter: blur(12px);
   color: #fff;
-  font-size: 12px; font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 8px;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: opacity .12s;
-  border: .5px solid rgba(255,255,255,0.10);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  transition: opacity .14s;
+  border: 0.5px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.45);
   z-index: 999;
+  letter-spacing: -0.1px;
 }
 .dock-icon-wrap:hover .dock-label { opacity: 1; }
 
