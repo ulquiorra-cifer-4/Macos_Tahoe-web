@@ -1,129 +1,109 @@
 "use strict";
 // ============================================================
-//  macOS Tahoe — window-manager.ts
+//  macOS Tahoe — window-manager.ts  (no module exports)
 //  Ported from Window.svelte + WindowsArea.svelte
 // ============================================================
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createWindow = createWindow;
-// ── Global z-index tracker (mirrors WindowsArea.svelte logic) ──
-let activeZIndex = 10;
-const windowStates = new Map();
-function raiseWindow(state) {
-    activeZIndex += 2;
-    state.zIndex = activeZIndex;
+// ── z-index tracker ──
+let _activeZ = 10;
+const _wins = new Map();
+let _activeId = null;
+function _raise(state) {
+    _activeZ += 2;
+    state.zIndex = _activeZ;
     state.el.style.zIndex = String(state.zIndex);
-    // Keep z-indices under 500 (mirrors the <50 guard in WindowsArea)
-    const allZ = [...windowStates.values()].map(s => s.zIndex).filter(z => z > 0);
+    const allZ = [..._wins.values()].map(s => s.zIndex).filter(z => z > 0);
     if (allZ.length && Math.max(...allZ) > 500) {
-        const lowest = Math.min(...new Set(allZ));
-        activeZIndex -= lowest;
-        windowStates.forEach(s => {
+        const lowest = Math.min(...[...new Set(allZ)]);
+        _activeZ -= lowest;
+        _wins.forEach(s => {
             if (s.zIndex >= lowest)
                 s.zIndex -= lowest;
             s.el.style.zIndex = String(s.zIndex);
         });
     }
 }
-// ── Active window tracking ──
-let activeAppId = null;
-function setActive(appId) {
-    // Unfocus all
-    windowStates.forEach((s, id) => {
+function _setActive(appId) {
+    _wins.forEach((s, id) => {
         s.el.classList.toggle("active", id === appId);
-        s.el.querySelector(".tl-container")
-            ?.classList.toggle("unfocused", id !== appId);
+        const tl = s.el.querySelector(".tl-lights");
+        if (tl)
+            tl.dataset.focused = id === appId ? "true" : "false";
+        const tlContainer = s.el.querySelector(".tl-container");
+        if (tlContainer)
+            tlContainer.classList.toggle("unfocused", id !== appId);
     });
-    activeAppId = appId;
-    const s = windowStates.get(appId);
+    _activeId = appId;
+    const s = _wins.get(appId);
     if (s)
-        raiseWindow(s);
+        _raise(s);
 }
-// ─────────────────────────────────────────────
-//  Traffic Lights
-// ─────────────────────────────────────────────
-function buildTrafficLights(appId, onClose, onMaximize) {
+// ── Traffic Lights ──
+function _buildTL(appId, onClose, onMaximize) {
     const container = document.createElement("div");
     container.className = "tl-container";
     const lights = document.createElement("div");
     lights.className = "tl-lights";
-    // Close — red
     const close = document.createElement("button");
     close.className = "tl-btn tl-close";
     close.setAttribute("aria-label", "Close");
-    close.innerHTML = `<svg viewBox="0 0 10 10" class="tl-icon"><path d="M3 3l4 4M7 3L3 7" stroke="rgba(0,0,0,0.5)" stroke-width="1.1" stroke-linecap="round"/></svg>`;
+    close.innerHTML = `<svg class="tl-icon" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3L3 7" stroke="rgba(0,0,0,0.55)" stroke-width="1.2" stroke-linecap="round"/></svg>`;
     close.addEventListener("click", (e) => { e.stopPropagation(); onClose(); });
-    // Minimize — yellow
     const minimize = document.createElement("button");
     minimize.className = "tl-btn tl-minimize";
     minimize.setAttribute("aria-label", "Minimize");
-    minimize.innerHTML = `<svg viewBox="0 0 10 10" class="tl-icon"><path d="M2 5h6" stroke="rgba(0,0,0,0.5)" stroke-width="1.1" stroke-linecap="round"/></svg>`;
-    minimize.addEventListener("click", (e) => { e.stopPropagation(); /* minimize later */ });
-    // Maximize — green
+    minimize.innerHTML = `<svg class="tl-icon" viewBox="0 0 10 10"><path d="M2 5h6" stroke="rgba(0,0,0,0.55)" stroke-width="1.2" stroke-linecap="round"/></svg>`;
     const maximize = document.createElement("button");
     maximize.className = "tl-btn tl-maximize";
     maximize.setAttribute("aria-label", "Maximize");
-    maximize.innerHTML = `<svg viewBox="0 0 10 10" class="tl-icon" style="transform:rotate(90deg)"><path d="M2 5h6M5 2l3 3-3 3" stroke="rgba(0,0,0,0.5)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    maximize.innerHTML = `<svg class="tl-icon" viewBox="0 0 10 10" style="transform:rotate(90deg)"><path d="M5 2v6M2 5l3-3 3 3" stroke="rgba(0,0,0,0.55)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     maximize.addEventListener("click", (e) => { e.stopPropagation(); onMaximize(); });
     lights.append(close, minimize, maximize);
     container.appendChild(lights);
     return container;
 }
-// ─────────────────────────────────────────────
-//  Dragging (mirrors @neodrag bounds + handle)
-// ─────────────────────────────────────────────
-function makeDraggable(el, handle, appId) {
-    let startX = 0, startY = 0, startLeft = 0, startTop = 0;
-    let dragging = false;
+// ── Drag ──
+function _makeDraggable(el, handle, appId) {
+    let sx = 0, sy = 0, sl = 0, st = 0;
     handle.addEventListener("mousedown", (e) => {
         if (e.button !== 0)
             return;
-        const state = windowStates.get(appId);
-        if (state?.isMaximized)
+        if (_wins.get(appId)?.isMaximized)
             return;
-        dragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        const rect = el.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
+        sx = e.clientX;
+        sy = e.clientY;
+        // Parse current translate
+        const m = el.style.transform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
+        sl = m ? parseFloat(m[1]) : 0;
+        st = m ? parseFloat(m[2]) : 0;
+        e.preventDefault();
+        _setActive(appId);
+        const onMove = (e) => {
+            const nx = sl + e.clientX - sx;
+            const ny = Math.max(28, st + e.clientY - sy);
+            el.style.transform = `translate(${nx}px, ${ny}px)`;
+        };
+        const onUp = () => {
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+        };
         document.addEventListener("mousemove", onMove);
         document.addEventListener("mouseup", onUp);
-        setActive(appId);
-        e.preventDefault();
     });
-    function onMove(e) {
-        if (!dragging)
-            return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        // Bounds: top >= 28px (menu bar height)
-        const newTop = Math.max(28, startTop + dy);
-        const newLeft = startLeft + dx;
-        el.style.transform = `translate(${newLeft}px, ${newTop}px)`;
-    }
-    function onUp() {
-        dragging = false;
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-    }
 }
-// ─────────────────────────────────────────────
-//  Maximize / Restore (mirrors maximizeApp())
-// ─────────────────────────────────────────────
-function makeMaximize(el, appId, w, h) {
-    const state = windowStates.get(appId);
+// ── Maximize ──
+function _maximize(el, appId, w, h) {
+    const state = _wins.get(appId);
+    el.style.transition = "width 0.3s ease, height 0.3s ease, transform 0.3s ease";
     if (!state.isMaximized) {
         state.prevTransform = el.style.transform;
         state.prevW = el.style.width;
         state.prevH = el.style.height;
-        el.style.transition = "width 0.3s ease, height 0.3s ease, transform 0.3s ease";
         el.style.transform = "translate(0px, 28px)";
         el.style.width = "100vw";
         el.style.height = "calc(100vh - 28px)";
         state.isMaximized = true;
     }
     else {
-        el.style.transition = "width 0.3s ease, height 0.3s ease, transform 0.3s ease";
         el.style.transform = state.prevTransform;
         el.style.width = state.prevW;
         el.style.height = state.prevH;
@@ -131,71 +111,64 @@ function makeMaximize(el, appId, w, h) {
     }
     setTimeout(() => { el.style.transition = ""; }, 320);
 }
-// ─────────────────────────────────────────────
-//  Create Window  (main export)
-// ─────────────────────────────────────────────
+// ── Main: createWindow ──
 function createWindow(cfg) {
-    // Don't double-open
-    if (windowStates.has(cfg.appId)) {
-        setActive(cfg.appId);
+    // Bring to front if already open
+    if (_wins.has(cfg.appId)) {
+        _setActive(cfg.appId);
         return;
     }
     const area = document.getElementById("windows-area");
-    // Random start position — mirrors rand_int(-600,600) in Window.svelte
-    const randX = (Math.random() - 0.5) * 300;
-    const randY = (Math.random() - 0.5) * 100;
-    const startX = window.innerWidth / 2 - cfg.width / 2 + randX;
-    const startY = window.innerHeight / 2 - cfg.height / 2 + randY;
-    const clampedY = Math.max(28, startY);
-    // Window element
+    if (!area) {
+        console.error("No #windows-area found");
+        return;
+    }
+    const rx = (Math.random() - 0.5) * 200;
+    const ry = (Math.random() - 0.5) * 80;
+    const sx = window.innerWidth / 2 - cfg.width / 2 + rx;
+    const sy = Math.max(48, window.innerHeight / 2 - cfg.height / 2 + ry);
     const win = document.createElement("section");
-    win.className = "app-window active";
+    win.className = "app-window";
     win.dataset.appId = cfg.appId;
     win.style.width = cfg.width + "px";
     win.style.height = cfg.height + "px";
-    win.style.transform = `translate(${startX}px, ${clampedY}px)`;
-    // State entry
+    win.style.position = "absolute";
     const state = {
         el: win, isMaximized: false,
-        prevTransform: "", prevW: "", prevH: "",
-        zIndex: 0, isDragging: false,
+        prevTransform: "", prevW: "", prevH: "", zIndex: 0,
     };
-    windowStates.set(cfg.appId, state);
-    // Close handler
+    _wins.set(cfg.appId, state);
     function closeApp() {
-        win.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+        win.style.transition = "opacity 0.18s ease, transform 0.18s ease";
         win.style.opacity = "0";
-        win.style.transform += " scale(0.96)";
-        setTimeout(() => {
-            win.remove();
-            windowStates.delete(cfg.appId);
-        }, 220);
+        const m = win.style.transform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
+        if (m)
+            win.style.transform = `translate(${m[1]}px, ${m[2]}px) scale(0.95)`;
+        setTimeout(() => { win.remove(); _wins.delete(cfg.appId); }, 200);
     }
     // Traffic lights
-    const tl = buildTrafficLights(cfg.appId, closeApp, () => makeMaximize(win, cfg.appId, cfg.width, cfg.height));
+    const tl = _buildTL(cfg.appId, closeApp, () => _maximize(win, cfg.appId, cfg.width, cfg.height));
     win.appendChild(tl);
-    // Drag handle — the title bar area
-    const dragHandle = document.createElement("div");
-    dragHandle.className = "app-window-drag-handle";
-    win.appendChild(dragHandle);
+    // Drag handle
+    const handle = document.createElement("div");
+    handle.className = "app-window-drag-handle";
+    win.appendChild(handle);
     // App content
     const content = cfg.content({ el: win, close: closeApp });
     win.appendChild(content);
-    // Focus on click
-    win.addEventListener("mousedown", () => setActive(cfg.appId));
-    // Drag
-    makeDraggable(win, dragHandle, cfg.appId);
+    win.addEventListener("mousedown", () => _setActive(cfg.appId));
+    _makeDraggable(win, handle, cfg.appId);
     // Open animation
     win.style.opacity = "0";
-    win.style.transform = `translate(${startX}px, ${clampedY}px) scale(0.94)`;
+    win.style.transform = `translate(${sx}px, ${sy}px) scale(0.94)`;
     area.appendChild(win);
     requestAnimationFrame(() => {
-        win.style.transition = "opacity 0.22s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1)";
+        win.style.transition = "opacity 0.22s ease, transform 0.25s cubic-bezier(0.34,1.4,0.64,1)";
         win.style.opacity = "1";
-        win.style.transform = `translate(${startX}px, ${clampedY}px) scale(1)`;
-        setTimeout(() => { win.style.transition = ""; }, 240);
+        win.style.transform = `translate(${sx}px, ${sy}px) scale(1)`;
+        setTimeout(() => { win.style.transition = ""; }, 280);
+        _setActive(cfg.appId);
     });
-    setActive(cfg.appId);
 }
-// ── Expose to global scope for plain JS usage ──
+// Expose globally — no module system needed
 window.__createWindow = createWindow;
