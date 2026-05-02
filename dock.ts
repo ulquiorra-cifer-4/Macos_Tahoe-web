@@ -32,10 +32,10 @@ const DOCK_ICONS: DockIcon[] = [
 ];
 
 // ── Magnification config ──
-const BASE       = 46;
-const MAX        = 74;
-const RADIUS     = 150;
-const MAX_LIFT   = 18;
+const BASE       = 54;
+const MAX        = 92;
+const RADIUS     = 200;
+const MAX_LIFT   = 22;
 
 let mouseX     = -9999;
 let isOverDock = false;
