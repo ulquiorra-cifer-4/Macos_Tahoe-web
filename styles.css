@@ -5,7 +5,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --dock-icon-size: 46px;
+  --dock-icon-size: 54px;
   --menu-h: 28px;
   --menu-bg: rgba(255,255,255,0.15);
   --menu-blur: 20px;
@@ -133,8 +133,8 @@ html, body {
   align-items: flex-end;
   /* gap matches reference: icons nearly touch, small breathing room */
   gap: 5px;
-  /* tight vertical padding — pill hugs icons like in reference */
-  padding: 4px 8px 5px;
+  /* THIN top — pill feels like a sliver above icons */
+  padding: 3px 10px 5px;
   /* reference glass: warm-tinted, semi-transparent, not too bright */
   background: rgba(168,165,180,0.30);
   border: 0.6px solid rgba(255,255,255,0.38);
@@ -142,18 +142,14 @@ html, body {
   backdrop-filter: blur(32px) saturate(160%) brightness(102%);
   -webkit-backdrop-filter: blur(32px) saturate(160%) brightness(102%);
   box-shadow:
-    /* top inner highlight */
     0 1px 0 rgba(255,255,255,0.20) inset,
-    /* bottom inner shadow */
     0 -1px 0 rgba(0,0,0,0.10) inset,
-    /* outer drop shadow */
     0 6px 28px rgba(0,0,0,0.38),
     0 1px 4px rgba(0,0,0,0.18);
   position: relative;
   overflow: visible;
-  /* FIXED height: icon(46) + pad-top(4) + pad-bottom(5) + dot-zone(7) = 62px
-     Top edge NEVER moves — only width breathes on magnification */
-  height: 62px;
+  /* height = icon(54) + pad-top(3) + pad-bottom(5) + dot-zone(7) = 69px */
+  height: 69px;
   box-sizing: content-box;
 }
 
