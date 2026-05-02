@@ -33,9 +33,9 @@ const DOCK_ICONS: DockIcon[] = [
 
 // ── Magnification config ──
 const BASE       = 54;   // resting icon size
-const MAX        = 100;  // max magnified — noticeable pull like friend's dock
-const RADIUS     = 240;  // very wide bell — 4-5 neighbours cascade smoothly
-const MAX_LIFT   = 26;   // upward lift px at full mag
+const MAX        = 100;  // max magnified size
+const RADIUS     = 240;  // wide bell — 4-5 neighbours wave
+const MAX_LIFT   = 6;    // barely any upward lift — icon grows in place, no gap
 
 let mouseX     = -9999;
 let isOverDock = false;
