@@ -22,10 +22,10 @@ const DOCK_ICONS = [
     { id: "trash", label: "Trash", src: "icons/trash.png", emoji: "🗑️", running: false },
 ];
 // ── Magnification config ──
-const BASE = 60; // resting icon size px
-const MAX = 96; // max icon size at cursor
-const RADIUS = 140; // bell curve influence radius px
-const MAX_LIFT = 20; // max upward translateY px when fully magnified
+const BASE = 44; // smaller resting size    // resting icon size px
+const MAX = 78; // magnified size    // max icon size at cursor
+const RADIUS = 160; // wider bell — more neighbours wave   // bell curve influence radius px
+const MAX_LIFT = 22; // upward lift px    // max upward translateY px when fully magnified
 let mouseX = -9999;
 let isOverDock = false;
 const dock = document.getElementById("dock");
