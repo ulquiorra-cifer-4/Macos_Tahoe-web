@@ -22,12 +22,13 @@ const DOCK_ICONS = [
     { id: "trash", label: "Trash", src: "icons/trash.png", emoji: "🗑️", running: false },
 ];
 // ── Magnification config ──
-const BASE = 54;
-const MAX = 92;
-const RADIUS = 200;
-const MAX_LIFT = 22;
+const BASE = 54; // resting icon size
+const MAX = 100; // max magnified — noticeable pull like friend's dock
+const RADIUS = 240; // very wide bell — 4-5 neighbours cascade smoothly
+const MAX_LIFT = 26; // upward lift px at full mag
 let mouseX = -9999;
 let isOverDock = false;
+let rafPending = false; // rAF throttle — silky 60fps, no jitter
 const dock = document.getElementById("dock");
 // ─────────────────────────────────────────────
 //  Build Dock
@@ -81,17 +82,20 @@ function sz(el, size) {
     el.style.height = size + "px";
 }
 // ─────────────────────────────────────────────
-//  Magnification — bell curve, icons lift UP
+//  Magnification — soft bell curve, icons lift UP
 //  Dock pill grows only LEFT ↔ RIGHT
 // ─────────────────────────────────────────────
 function bellSize(dist) {
     if (dist >= RADIUS)
         return BASE;
-    // Smooth cosine bell — identical to Apple
+    // Raised cosine bell — gentle wide falloff like Apple's real dock
     const t = (Math.cos((dist / RADIUS) * Math.PI) + 1) / 2;
-    return BASE + (MAX - BASE) * t;
+    // Apply a power curve to soften the shoulders further
+    const smooth = t * t * (3 - 2 * t); // smoothstep — rounder wave
+    return BASE + (MAX - BASE) * smooth;
 }
 function applyMag() {
+    rafPending = false;
     dock.querySelectorAll(".dock-icon-wrap").forEach((wrap) => {
         const iconEl = wrap.querySelector(".dock-icon, .dock-icon-emoji");
         if (!iconEl)
@@ -100,19 +104,22 @@ function applyMag() {
         const cx = r.left + r.width / 2;
         const dist = Math.abs(mouseX - cx);
         const size = isOverDock ? bellSize(dist) : BASE;
-        const frac = (size - BASE) / (MAX - BASE); // 0..1
-        // Size
+        const frac = (size - BASE) / (MAX - BASE);
         sz(iconEl, size);
         if (iconEl.classList.contains("dock-icon-emoji")) {
             iconEl.style.fontSize = Math.round(size * 0.52) + "px";
         }
-        // Lift upward — translateY negative = up
-        // Icons grow from their bottom edge upward naturally because
-        // dock uses align-items:flex-end, so we add extra lift on top
         iconEl.style.transform = `translateY(-${frac * MAX_LIFT}px)`;
     });
 }
+function scheduleMag() {
+    if (rafPending)
+        return;
+    rafPending = true;
+    requestAnimationFrame(applyMag);
+}
 function resetMag() {
+    rafPending = false;
     dock.querySelectorAll(".dock-icon-wrap").forEach((wrap) => {
         const iconEl = wrap.querySelector(".dock-icon, .dock-icon-emoji");
         if (!iconEl)
@@ -124,15 +131,15 @@ function resetMag() {
         iconEl.style.transform = "translateY(0)";
     });
 }
-// Only listen to mouse events ON the dock — never the full document
+// Only fire on the dock element — never the whole document
 dock.addEventListener("mouseenter", (e) => {
     isOverDock = true;
     mouseX = e.clientX;
-    applyMag();
+    scheduleMag();
 });
 dock.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
-    applyMag();
+    scheduleMag();
 });
 dock.addEventListener("mouseleave", () => {
     isOverDock = false;
