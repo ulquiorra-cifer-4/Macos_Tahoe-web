@@ -221,6 +221,12 @@ function buildDock(): void {
       if (wrap.classList.contains("bouncing")) return;
       wrap.classList.add("bouncing", "running");
       wrap.addEventListener("animationend", () => wrap.classList.remove("bouncing"), { once: true });
+
+      // Open app window if registered
+      const appId = icon.id;
+      if (appId === "trash" && typeof (window as any).openTrashWindow === "function") {
+        (window as any).openTrashWindow();
+      }
     });
 
     dock.appendChild(wrap);
