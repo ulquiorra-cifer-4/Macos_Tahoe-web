@@ -1,8 +1,8 @@
 "use strict";
 // ============================================================
 //  macOS Tahoe Web Emulator — dock.ts
+//  Real macOS dock: icons grow UP, pill only expands sideways
 // ============================================================
-// ── Cleaned icon list ──
 const DOCK_ICONS = [
     { id: "finder", label: "Finder", src: "icons/finder.png", emoji: "🔵", running: true },
     { id: "launchpad", label: "Launchpad", src: "icons/launchpad.png", emoji: "🚀", running: false },
@@ -21,13 +21,17 @@ const DOCK_ICONS = [
     { id: "_sep2", label: "", src: "", emoji: "", running: false, separator: true },
     { id: "trash", label: "Trash", src: "icons/trash.png", emoji: "🗑️", running: false },
 ];
-const ICON_BASE = 60;
-const ICON_MAX = 96;
-const MAG_RADIUS = 120;
+// ── Magnification config ──
+const BASE = 60; // resting icon size px
+const MAX = 96; // max icon size at cursor
+const RADIUS = 140; // bell curve influence radius px
+const MAX_LIFT = 20; // max upward translateY px when fully magnified
 let mouseX = -9999;
 let isOverDock = false;
 const dock = document.getElementById("dock");
-// ── Build ──
+// ─────────────────────────────────────────────
+//  Build Dock
+// ─────────────────────────────────────────────
 function buildDock() {
     dock.innerHTML = "";
     DOCK_ICONS.forEach((icon) => {
@@ -47,8 +51,8 @@ function buildDock() {
         img.className = "dock-icon";
         img.alt = icon.label;
         img.draggable = false;
-        applySize(img, ICON_BASE);
-        img.onerror = () => img.replaceWith(makeEmoji(icon.emoji, ICON_BASE));
+        sz(img, BASE);
+        img.onerror = () => img.replaceWith(emojiEl(icon.emoji, BASE));
         img.src = icon.src;
         const dot = document.createElement("div");
         dot.className = "dock-dot";
@@ -64,51 +68,63 @@ function buildDock() {
         dock.appendChild(wrap);
     });
 }
-function makeEmoji(emoji, size) {
+function emojiEl(emoji, size) {
     const el = document.createElement("div");
     el.className = "dock-icon-emoji";
-    applySize(el, size);
-    el.style.fontSize = Math.round(size * 0.55) + "px";
+    sz(el, size);
+    el.style.fontSize = Math.round(size * 0.52) + "px";
     el.textContent = emoji;
     return el;
 }
-function applySize(el, size) {
+function sz(el, size) {
     el.style.width = size + "px";
     el.style.height = size + "px";
 }
-// ── Magnification — ONLY when cursor is over the dock ──
-function getSize(centerX) {
-    const dist = Math.abs(mouseX - centerX);
-    if (dist >= MAG_RADIUS)
-        return ICON_BASE;
-    const t = (Math.cos((dist / MAG_RADIUS) * Math.PI) + 1) / 2;
-    return ICON_BASE + (ICON_MAX - ICON_BASE) * t;
+// ─────────────────────────────────────────────
+//  Magnification — bell curve, icons lift UP
+//  Dock pill grows only LEFT ↔ RIGHT
+// ─────────────────────────────────────────────
+function bellSize(dist) {
+    if (dist >= RADIUS)
+        return BASE;
+    // Smooth cosine bell — identical to Apple
+    const t = (Math.cos((dist / RADIUS) * Math.PI) + 1) / 2;
+    return BASE + (MAX - BASE) * t;
 }
 function applyMag() {
     dock.querySelectorAll(".dock-icon-wrap").forEach((wrap) => {
-        const el = wrap.querySelector(".dock-icon, .dock-icon-emoji");
-        if (!el)
+        const iconEl = wrap.querySelector(".dock-icon, .dock-icon-emoji");
+        if (!iconEl)
             return;
         const r = wrap.getBoundingClientRect();
         const cx = r.left + r.width / 2;
-        const size = isOverDock ? getSize(cx) : ICON_BASE;
-        applySize(el, size);
-        el.style.fontSize = Math.round(size * 0.55) + "px";
-        const lift = ((size - ICON_BASE) / (ICON_MAX - ICON_BASE)) * 14;
-        el.style.transform = `translateY(-${lift}px)`;
+        const dist = Math.abs(mouseX - cx);
+        const size = isOverDock ? bellSize(dist) : BASE;
+        const frac = (size - BASE) / (MAX - BASE); // 0..1
+        // Size
+        sz(iconEl, size);
+        if (iconEl.classList.contains("dock-icon-emoji")) {
+            iconEl.style.fontSize = Math.round(size * 0.52) + "px";
+        }
+        // Lift upward — translateY negative = up
+        // Icons grow from their bottom edge upward naturally because
+        // dock uses align-items:flex-end, so we add extra lift on top
+        iconEl.style.transform = `translateY(-${frac * MAX_LIFT}px)`;
     });
 }
 function resetMag() {
     dock.querySelectorAll(".dock-icon-wrap").forEach((wrap) => {
-        const el = wrap.querySelector(".dock-icon, .dock-icon-emoji");
-        if (!el)
+        const iconEl = wrap.querySelector(".dock-icon, .dock-icon-emoji");
+        if (!iconEl)
             return;
-        applySize(el, ICON_BASE);
-        el.style.fontSize = Math.round(ICON_BASE * 0.55) + "px";
-        el.style.transform = "translateY(0)";
+        sz(iconEl, BASE);
+        if (iconEl.classList.contains("dock-icon-emoji")) {
+            iconEl.style.fontSize = Math.round(BASE * 0.52) + "px";
+        }
+        iconEl.style.transform = "translateY(0)";
     });
 }
-// Only listen on the dock — not on the whole document
+// Only listen to mouse events ON the dock — never the full document
 dock.addEventListener("mouseenter", (e) => {
     isOverDock = true;
     mouseX = e.clientX;
@@ -123,19 +139,22 @@ dock.addEventListener("mouseleave", () => {
     mouseX = -9999;
     resetMag();
 });
-// ── Wallpaper — auto-load wallpaper.jpg ──
+// ─────────────────────────────────────────────
+//  Wallpaper — auto-load wallpaper.jpg
+// ─────────────────────────────────────────────
 const wallpaperLayer = document.getElementById("wallpaperLayer");
-(function loadWallpaper() {
+(function () {
     const probe = new Image();
-    probe.onload = () => {
-        wallpaperLayer.style.backgroundImage = "url(wallpaper.jpg)";
-    };
+    probe.onload = () => { wallpaperLayer.style.backgroundImage = "url(wallpaper.jpg)"; };
     probe.onerror = () => {
-        wallpaperLayer.style.background = "linear-gradient(155deg,#061224 0%,#0b2545 20%,#0e3d6e 40%,#1a5a8a 58%,#2c7bb0 72%,#4da0c8 84%,#89c8d8 93%,#d0ecd8 100%)";
+        wallpaperLayer.style.background =
+            "linear-gradient(155deg,#061224 0%,#0b2545 20%,#0e3d6e 40%,#1a5a8a 58%,#2c7bb0 72%,#4da0c8 84%,#89c8d8 93%,#d0ecd8 100%)";
     };
     probe.src = "wallpaper.jpg?" + Date.now();
 })();
-// ── Clock ──
+// ─────────────────────────────────────────────
+//  Menu Bar Clock
+// ─────────────────────────────────────────────
 function updateClock() {
     const el = document.getElementById("menuClock");
     if (!el)
@@ -143,36 +162,40 @@ function updateClock() {
     const now = new Date();
     const M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const D = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const h = now.getHours();
-    const m = now.getMinutes().toString().padStart(2, "0");
+    const h = now.getHours(), m = now.getMinutes().toString().padStart(2, "0");
     el.textContent = `${D[now.getDay()]} ${M[now.getMonth()]} ${now.getDate()}  ${(h % 12) || 12}:${m} ${h >= 12 ? "PM" : "AM"}`;
 }
 updateClock();
 setInterval(updateClock, 10000);
-// ── Calendar ──
+// ─────────────────────────────────────────────
+//  Calendar Widget
+// ─────────────────────────────────────────────
 function buildCalendar() {
     const el = document.getElementById("calendarWidget");
     if (!el)
         return;
     const now = new Date();
     const y = now.getFullYear(), mo = now.getMonth(), td = now.getDate();
-    const MN = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-    const firstDay = new Date(y, mo, 1).getDay();
+    const MN = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    const fd = new Date(y, mo, 1).getDay();
     const dim = new Date(y, mo + 1, 0).getDate();
-    const prev = new Date(y, mo, 0).getDate();
+    const prv = new Date(y, mo, 0).getDate();
     let h = `<div class="cal-header">${MN[mo]}</div><div class="cal-grid">`;
     ["S", "M", "T", "W", "T", "F", "S"].forEach(d => { h += `<div class="cal-dow">${d}</div>`; });
-    for (let i = 0; i < firstDay; i++)
-        h += `<div class="cal-day other-month">${prev - firstDay + i + 1}</div>`;
+    for (let i = 0; i < fd; i++)
+        h += `<div class="cal-day other-month">${prv - fd + i + 1}</div>`;
     for (let d = 1; d <= dim; d++)
         h += `<div class="cal-day${d === td ? " today" : ""}">${d}</div>`;
-    const tail = (firstDay + dim) % 7;
+    const tail = (fd + dim) % 7;
     if (tail > 0)
         for (let i = 1; i <= 7 - tail; i++)
             h += `<div class="cal-day other-month">${i}</div>`;
     el.innerHTML = h + "</div>";
 }
-// ── Drop icon onto dock ──
+// ─────────────────────────────────────────────
+//  Drop PNG onto dock to add live
+// ─────────────────────────────────────────────
 dock.addEventListener("dragover", (e) => e.preventDefault());
 dock.addEventListener("drop", (e) => {
     e.preventDefault();
@@ -185,8 +208,10 @@ dock.addEventListener("drop", (e) => {
     });
     buildDock();
 });
-// ── Init ──
+// ─────────────────────────────────────────────
+//  Init
+// ─────────────────────────────────────────────
 buildDock();
 buildCalendar();
-const msToMidnight = () => { const n = new Date(); return (86400 - n.getHours() * 3600 - n.getMinutes() * 60 - n.getSeconds()) * 1000; };
-setTimeout(() => { buildCalendar(); setInterval(buildCalendar, 86400000); }, msToMidnight());
+const msToMid = () => { const n = new Date(); return (86400 - n.getHours() * 3600 - n.getMinutes() * 60 - n.getSeconds()) * 1000; };
+setTimeout(() => { buildCalendar(); setInterval(buildCalendar, 86400000); }, msToMid());
