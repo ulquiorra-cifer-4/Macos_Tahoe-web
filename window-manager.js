@@ -90,6 +90,21 @@ function _makeDraggable(el, handle, appId) {
         document.addEventListener("mouseup", onUp);
     });
 }
+// ── Dock hide/show ──
+function _hideDock() {
+    const dc = document.getElementById("dockContainer");
+    if (!dc)
+        return;
+    dc.style.transition = "transform 0.32s cubic-bezier(0.4,0,0.2,1)";
+    dc.style.transform = "translateY(120%)";
+}
+function _showDock() {
+    const dc = document.getElementById("dockContainer");
+    if (!dc)
+        return;
+    dc.style.transition = "transform 0.38s cubic-bezier(0.34,1.4,0.64,1)";
+    dc.style.transform = "translateY(0%)";
+}
 // ── Maximize ──
 function _maximize(el, appId, w, h) {
     const state = _wins.get(appId);
@@ -102,12 +117,14 @@ function _maximize(el, appId, w, h) {
         el.style.width = "100vw";
         el.style.height = "calc(100vh - 28px)";
         state.isMaximized = true;
+        _hideDock();
     }
     else {
         el.style.transform = state.prevTransform;
         el.style.width = state.prevW;
         el.style.height = state.prevH;
         state.isMaximized = false;
+        _showDock();
     }
     setTimeout(() => { el.style.transition = ""; }, 320);
 }
