@@ -148,9 +148,9 @@ html, body {
     0 1px 4px rgba(0,0,0,0.18);
   position: relative;
   overflow: visible;
-  /* min-height based on base icon — pill top rises naturally as icons grow upward
-     no fixed height so the glass always hugs icons with no empty floor gap */
-  min-height: 65px;
+  /* LOCKED height = base icon(54) + pad-top(3) + pad-bottom(5) + dot(7) = 69px
+     Top edge NEVER moves. Icons grow upward via overflow:visible outside the pill */
+  height: 69px;
   box-sizing: content-box;
 }
 
@@ -164,7 +164,7 @@ html, body {
   flex-shrink: 0;
 }
 
-/* Icon wrapper — bottom-aligned, dot space reserved absolutely */
+/* Icon wrapper — always pinned to bottom of pill, grows upward via overflow */
 .dock-icon-wrap {
   display: flex;
   flex-direction: column;
@@ -174,7 +174,6 @@ html, body {
   cursor: pointer;
   flex-shrink: 0;
   overflow: visible;
-  /* space at bottom for dot — doesn't affect icon centering */
   padding-bottom: 7px;
 }
 
