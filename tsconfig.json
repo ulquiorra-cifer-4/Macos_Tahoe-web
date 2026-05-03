@@ -5,13 +5,16 @@
     "strict": true,
     "outDir": "/home/claude/macos-web",
     "rootDir": "/home/claude/macos-web",
-    "removeComments": false,
     "lib": ["ES2020", "DOM"],
     "ignoreDeprecations": "6.0"
   },
   "files": [
     "dock.ts",
     "window-manager.ts",
-    "apps/trash.ts"
+    "menubar.ts",
+    "apps/trash.ts",
+    "apps/notes/notes-store.ts",
+    "apps/notes/notes-editor.ts",
+    "apps/notes/notes-app.ts"
   ]
 }
