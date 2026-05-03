@@ -1,0 +1,373 @@
+/* ============================================================
+   Notes App — notes.css
+   3-panel macOS Notes layout
+   ============================================================ */
+
+/* ── Window shell ── */
+.notes-app {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  background: #f2f1f0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  color: #1c1c1e;
+  user-select: none;
+}
+
+/* ── Top bar ── */
+.na-topbar {
+  height: 44px; min-height: 44px;
+  background: rgba(235,233,229,0.95);
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  display: flex; align-items: center;
+  padding: 0 12px 0 80px;   /* left clears traffic lights */
+  gap: 8px;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+.na-topbar-center { flex: 1; }
+.na-topbar-right  { display: flex; gap: 4px; }
+.na-topbar-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.55);
+  transition: background 120ms ease;
+}
+.na-topbar-btn:hover { background: rgba(0,0,0,0.08); color: #000; }
+
+/* ── Body (3 panels) ── */
+.na-body {
+  flex: 1; display: flex; overflow: hidden;
+}
+
+/* ═══ PANEL 1: Sidebar ═══ */
+.na-sidebar {
+  width: 220px; min-width: 220px;
+  background: #e8e6e1;
+  border-right: 0.5px solid rgba(0,0,0,0.1);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+  transition: width 0.2s ease, min-width 0.2s ease;
+  flex-shrink: 0;
+}
+.na-sidebar.hidden { width: 0; min-width: 0; overflow: hidden; }
+
+.na-sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px 6px;
+  flex-shrink: 0;
+}
+.na-sidebar-title {
+  font-size: 11px; font-weight: 600;
+  color: rgba(0,0,0,0.4); letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.na-sidebar-add {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.4);
+  transition: background 100ms;
+}
+.na-sidebar-add:hover { background: rgba(0,0,0,0.08); color: #000; }
+
+.na-folder-group-label {
+  font-size: 10.5px; font-weight: 600;
+  color: rgba(0,0,0,0.35);
+  padding: 10px 14px 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.na-folder-sep { height: 0.5px; background: rgba(0,0,0,0.1); margin: 6px 12px; }
+
+.na-folder-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 12px;
+  background: none; border: none; cursor: pointer;
+  border-radius: 8px; margin: 1px 6px;
+  text-align: left; width: calc(100% - 12px);
+  transition: background 100ms;
+  font-size: 13px; color: #1c1c1e;
+}
+.na-folder-item:hover  { background: rgba(0,0,0,0.06); }
+.na-folder-item.active { background: rgba(245,166,35,0.22); }
+.na-folder-icon { font-size: 14px; flex-shrink: 0; }
+.na-folder-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.na-folder-count {
+  font-size: 11px; color: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.07); border-radius: 10px;
+  padding: 1px 6px; flex-shrink: 0;
+}
+
+/* ═══ PANEL 2: Note List ═══ */
+.na-list {
+  width: 270px; min-width: 270px;
+  background: #f5f3ef;
+  border-right: 0.5px solid rgba(0,0,0,0.1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.na-list-header {
+  padding: 10px 12px 8px;
+  background: rgba(240,238,234,0.95);
+  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+.na-list-title {
+  font-size: 17px; font-weight: 700;
+  color: #1c1c1e; margin-bottom: 2px;
+}
+.na-list-count {
+  font-size: 11px; color: rgba(0,0,0,0.4);
+  margin-bottom: 4px;
+}
+.na-list-actions { display: flex; gap: 4px; }
+.na-list-btn {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.4); transition: background 100ms;
+}
+.na-list-btn:hover { background: rgba(0,0,0,0.08); }
+
+.na-list-body { flex: 1; overflow-y: auto; padding: 4px 0; }
+.na-list-empty {
+  text-align: center; padding: 40px 16px;
+  color: rgba(0,0,0,0.3); font-size: 15px;
+}
+
+.na-year-header {
+  font-size: 13px; font-weight: 700;
+  color: rgba(0,0,0,0.5);
+  padding: 10px 14px 4px;
+}
+
+.na-note-item {
+  display: block; width: 100%;
+  background: none; border: none; cursor: pointer;
+  text-align: left; padding: 0;
+  border-radius: 10px; margin: 1px 6px; width: calc(100% - 12px);
+  transition: background 100ms;
+}
+.na-note-item:hover  { background: rgba(0,0,0,0.05); }
+.na-note-item.active { background: #f5a623; }
+.na-note-item.active .na-note-meta,
+.na-note-item.active .na-note-date,
+.na-note-item.active .na-note-preview,
+.na-note-item.active .na-note-folder-tag { color: rgba(255,255,255,0.75) !important; }
+.na-note-item.active .na-note-title { color: #fff; }
+.na-note-item.active .na-pin-icon { fill: rgba(255,255,255,0.8); }
+
+.na-note-item-inner {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px;
+}
+.na-note-item-main { flex: 1; min-width: 0; }
+.na-note-item-header {
+  display: flex; align-items: center; gap: 4px;
+  margin-bottom: 2px;
+}
+.na-pin-icon { fill: #f5a623; flex-shrink: 0; margin-top: 1px; }
+.na-note-title {
+  font-size: 13px; font-weight: 600; color: #1c1c1e;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.na-note-meta { font-size: 11.5px; color: rgba(0,0,0,0.45); margin-bottom: 2px; }
+.na-note-date { font-weight: 500; }
+.na-note-preview { color: rgba(0,0,0,0.35); }
+.na-note-folder-tag {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 10.5px; color: rgba(0,0,0,0.35);
+}
+.na-note-item-thumb {
+  flex-shrink: 0; width: 46px; height: 46px;
+  border-radius: 6px; overflow: hidden;
+}
+.na-note-thumb { width: 100%; height: 100%; object-fit: cover; }
+
+/* ═══ PANEL 3: Editor ═══ */
+.na-editor-panel {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; background: #fffef9;
+}
+
+/* ── Editor toolbar ── */
+.ne-toolbar {
+  height: 40px; min-height: 40px;
+  background: rgba(248,247,243,0.95);
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  display: flex; align-items: center;
+  padding: 0 10px; gap: 2px;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.ne-toolbar::-webkit-scrollbar { display: none; }
+
+.ne-tb-group { display: flex; align-items: center; gap: 1px; }
+.ne-tb-divider { width: 0.5px; height: 18px; background: rgba(0,0,0,0.15); margin: 0 4px; flex-shrink: 0; }
+
+.ne-tb-btn {
+  width: 28px; height: 28px; border-radius: 5px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.6);
+  transition: background 100ms, color 100ms;
+  flex-shrink: 0;
+}
+.ne-tb-btn:hover  { background: rgba(0,0,0,0.08); color: #000; }
+.ne-tb-btn.active { background: rgba(0,0,0,0.12); color: #000; }
+
+.ne-search-wrap {
+  margin-left: auto; display: flex; align-items: center; gap: 5px;
+  background: rgba(0,0,0,0.07); border-radius: 7px;
+  padding: 3px 8px; flex-shrink: 0;
+}
+.ne-search-input {
+  width: 120px; background: none; border: none; outline: none;
+  font-size: 12px; color: #1c1c1e;
+}
+.ne-search-input::placeholder { color: rgba(0,0,0,0.3); }
+
+/* ── Editor scroll ── */
+.ne-editor-scroll { flex: 1; overflow-y: auto; }
+
+/* ── Editor content area ── */
+.ne-editor {
+  min-height: 100%;
+  padding: 20px 40px 40px;
+  outline: none;
+  font-size: 14px; line-height: 1.65;
+  color: #1c1c1e;
+  caret-color: #f5a623;
+}
+.ne-editor:focus { outline: none; }
+
+/* Typography inside editor */
+.ne-editor h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+.ne-editor h2 { font-size: 18px; font-weight: 700; margin: 12px 0 6px; }
+.ne-editor h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; }
+.ne-editor p  { margin: 0 0 6px; }
+.ne-editor ul, .ne-editor ol { margin: 6px 0 6px 20px; }
+.ne-editor li { margin-bottom: 3px; }
+.ne-editor blockquote {
+  border-left: 3px solid #f5a623;
+  margin: 8px 0; padding: 4px 12px;
+  color: rgba(0,0,0,0.6); font-style: italic;
+}
+
+/* Checklist */
+.ne-checklist-item {
+  display: flex; align-items: flex-start; gap: 7px;
+  margin: 3px 0;
+}
+.ne-checkbox {
+  width: 15px; height: 15px; margin-top: 2px;
+  accent-color: #f5a623; flex-shrink: 0;
+}
+.ne-checklist-item span { flex: 1; outline: none; }
+.ne-checklist-item input:checked + span {
+  text-decoration: line-through; color: rgba(0,0,0,0.4);
+}
+
+/* Table */
+.ne-table {
+  width: 100%; border-collapse: collapse;
+  margin: 10px 0; font-size: 13px;
+}
+.ne-td {
+  border: 1px solid rgba(0,0,0,0.15);
+  padding: 6px 10px; min-width: 80px;
+  outline: none; cursor: text;
+  vertical-align: top;
+}
+.ne-table th.ne-td {
+  background: rgba(0,0,0,0.04); font-weight: 600;
+}
+.ne-td:focus { background: rgba(245,166,35,0.07); }
+
+/* Images */
+.ne-img {
+  max-width: 100%; border-radius: 8px;
+  margin: 8px 0; display: block;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+
+/* File attachment */
+.ne-file-attach {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,0.06); border-radius: 8px;
+  padding: 5px 10px; font-size: 12px;
+  color: rgba(0,0,0,0.7); margin: 4px 0;
+}
+
+/* Search highlight */
+mark.ne-highlight { background: rgba(245,166,35,0.4); border-radius: 2px; }
+
+/* Empty state */
+.ne-empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; gap: 12px;
+  color: rgba(0,0,0,0.25); pointer-events: none;
+}
+.ne-empty-icon { font-size: 52px; opacity: 0.4; }
+
+/* ═══ Context Menu ═══ */
+.na-context-menu {
+  position: fixed; z-index: 99999;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-radius: 10px;
+  padding: 5px;
+  min-width: 160px;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15), 0 6px 24px rgba(0,0,0,0.25);
+}
+.na-ctx-item {
+  display: block; width: 100%;
+  padding: 6px 12px; background: none; border: none;
+  cursor: pointer; text-align: left; font-size: 13px;
+  color: #1c1c1e; border-radius: 6px;
+  transition: background 80ms;
+}
+.na-ctx-item:hover    { background: rgba(0,0,0,0.07); }
+.na-ctx-danger        { color: #ff3b30; }
+.na-ctx-danger:hover  { background: rgba(255,59,48,0.1); }
+.na-ctx-sep           { height: 0.5px; background: rgba(0,0,0,0.1); margin: 4px 6px; }
+
+/* ═══ Scrollbars ═══ */
+.na-sidebar::-webkit-scrollbar,
+.na-list-body::-webkit-scrollbar,
+.ne-editor-scroll::-webkit-scrollbar { width: 6px; }
+.na-sidebar::-webkit-scrollbar-track,
+.na-list-body::-webkit-scrollbar-track,
+.ne-editor-scroll::-webkit-scrollbar-track { background: transparent; }
+.na-sidebar::-webkit-scrollbar-thumb,
+.na-list-body::-webkit-scrollbar-thumb,
+.ne-editor-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15); border-radius: 3px;
+}
+
+/* ═══ Dark mode ═══ */
+#desktop.dark-mode .notes-app       { background: #1c1c1e; color: #f5f5f7; }
+#desktop.dark-mode .na-topbar       { background: rgba(28,28,30,0.95); border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .na-sidebar      { background: #252526; border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .na-folder-item  { color: #f5f5f7; }
+#desktop.dark-mode .na-folder-item:hover  { background: rgba(255,255,255,0.08); }
+#desktop.dark-mode .na-folder-item.active { background: rgba(245,166,35,0.25); }
+#desktop.dark-mode .na-list         { background: #2c2c2e; border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .na-list-header  { background: rgba(38,38,40,0.95); }
+#desktop.dark-mode .na-list-title   { color: #f5f5f7; }
+#desktop.dark-mode .na-note-item:hover   { background: rgba(255,255,255,0.06); }
+#desktop.dark-mode .na-note-title   { color: #f5f5f7; }
+#desktop.dark-mode .na-editor-panel { background: #1c1c1e; }
+#desktop.dark-mode .ne-toolbar      { background: rgba(28,28,30,0.95); border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .ne-editor       { color: #f5f5f7; }
+#desktop.dark-mode .ne-tb-btn       { color: rgba(255,255,255,0.6); }
+#desktop.dark-mode .ne-tb-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+#desktop.dark-mode .na-context-menu { background: rgba(44,44,46,0.95); }
+#desktop.dark-mode .na-ctx-item     { color: #f5f5f7; }
