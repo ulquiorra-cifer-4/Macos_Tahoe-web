@@ -114,6 +114,9 @@ function buildDock() {
             if (icon.id === "trash" && typeof window.openTrashWindow === "function") {
                 window.openTrashWindow();
             }
+            if (icon.id === "notes" && typeof window.openNotesWindow === "function") {
+                window.openNotesWindow();
+            }
         });
         dock.appendChild(wrap);
         iconStates.push(state);
