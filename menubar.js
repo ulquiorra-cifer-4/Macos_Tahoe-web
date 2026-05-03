@@ -1,31 +1,22 @@
 "use strict";
 // ============================================================
 //  macOS Tahoe — menubar.ts
-//  Ported from TopBar + MenuBar + Menu + ActionCenter Svelte files
-//  EXTRAS vs friend's build:
-//    • Volume slider
-//    • Brightness slider  
-//    • Wi-Fi toggle with network name
-//    • Bluetooth toggle
-//    • Battery % in Action Center
-//    • Do Not Disturb toggle
-//    • Keyboard shortcut hints in menus
 // ============================================================
-// ── State ──
 const MB = {
     activeMenu: '',
     actionCenterOpen: false,
     darkMode: false,
-    animations: true,
     doNotDisturb: false,
     wifi: true,
     bluetooth: true,
+    airdrop: true,
     volume: 72,
     brightness: 85,
     accentColor: '#0a84ff',
     batteryPct: 78,
+    nowPlaying: { title: 'Besties', artist: 'Black Country, New Road', playing: true },
 };
-// ── Menu definitions — mirrors menubar_state.menus in friend's source ──
+// ── Menu definitions ──
 const MENUS = {
     apple: {
         title: '',
@@ -68,7 +59,6 @@ const MENUS = {
         items: [
             { label: 'New Finder Window', shortcut: '⌘N' },
             { label: 'New Folder', shortcut: '⇧⌘N' },
-            { label: 'New Folder with Selection', shortcut: '⌃⌘N', disabled: true },
             { label: 'New Smart Folder', shortcut: '', disabled: true },
             { label: 'New Tab', shortcut: '⌘T' },
             { sep: true },
@@ -152,7 +142,6 @@ function buildMenuBar() {
     if (!bar)
         return;
     bar.innerHTML = "";
-    // Left side — menus
     const left = document.createElement("div");
     left.className = "menu-left";
     Object.entries(MENUS).forEach(([id, cfg]) => {
@@ -168,44 +157,29 @@ function buildMenuBar() {
         else {
             btn.textContent = cfg.title;
         }
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            toggleMenu(id, wrap);
-        });
-        btn.addEventListener("mouseenter", () => {
-            if (MB.activeMenu && MB.activeMenu !== id)
-                toggleMenu(id, wrap);
-        });
-        // Dropdown
+        btn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(id, wrap); });
+        btn.addEventListener("mouseenter", () => { if (MB.activeMenu && MB.activeMenu !== id)
+            toggleMenu(id, wrap); });
         const dropdown = buildDropdown(cfg.items);
-        dropdown.className = "menu-dropdown";
-        dropdown.dataset.menuId = id;
         wrap.append(btn, dropdown);
         left.appendChild(wrap);
     });
-    // Right side — status items + action center + clock
     const right = document.createElement("div");
     right.className = "menu-right";
-    // Battery
+    // Battery icon
     const batEl = document.createElement("span");
-    batEl.className = "menu-status battery-status";
-    batEl.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg><span id="mbBatPct">${MB.batteryPct}%</span>`;
+    batEl.className = "menu-status";
+    batEl.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg><span>${MB.batteryPct}%</span>`;
     // Wifi
     const wifiEl = document.createElement("span");
     wifiEl.className = "menu-status";
     wifiEl.id = "mbWifi";
     wifiEl.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>`;
-    // Action center toggle — mirrors ActionCenterToggle.svelte
+    // Action center toggle button (grid icon)
     const acBtn = document.createElement("button");
     acBtn.className = "menu-status ac-toggle";
     acBtn.id = "acToggleBtn";
-    acBtn.innerHTML = `
-    <svg viewBox="0 0 18 18" fill="currentColor" width="15" height="15">
-      <rect x="1"  y="1"  width="6" height="6" rx="1.5"/>
-      <rect x="11" y="1"  width="6" height="6" rx="1.5"/>
-      <rect x="1"  y="11" width="6" height="6" rx="1.5"/>
-      <rect x="11" y="11" width="6" height="6" rx="1.5"/>
-    </svg>`;
+    acBtn.innerHTML = `<svg viewBox="0 0 18 18" fill="currentColor" width="14" height="14"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="11" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>`;
     acBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleActionCenter(); });
     // Clock
     const clockBtn = document.createElement("button");
@@ -213,12 +187,11 @@ function buildMenuBar() {
     clockBtn.id = "menuClock";
     right.append(batEl, wifiEl, acBtn, clockBtn);
     bar.append(left, right);
-    // Action center panel
     buildActionCenter();
     updateClock();
 }
 // ─────────────────────────────────────────────
-//  Dropdown menu
+//  Dropdown
 // ─────────────────────────────────────────────
 function buildDropdown(items) {
     const section = document.createElement("section");
@@ -236,10 +209,10 @@ function buildDropdown(items) {
             btn.disabled = true;
         const label = document.createElement("span");
         label.textContent = item.label ?? "";
-        const shortcut = document.createElement("span");
-        shortcut.className = "menu-shortcut";
-        shortcut.textContent = item.shortcut ?? "";
-        btn.append(label, shortcut);
+        const sc = document.createElement("span");
+        sc.className = "menu-shortcut";
+        sc.textContent = item.shortcut ?? "";
+        btn.append(label, sc);
         section.appendChild(btn);
     });
     return section;
@@ -258,184 +231,209 @@ function closeAllMenus() {
     document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("menu-active"));
     document.querySelectorAll(".menu-dropdown").forEach(d => d.classList.remove("open"));
 }
-// Close menus on outside click
 document.addEventListener("click", closeAllMenus);
 // ─────────────────────────────────────────────
-//  Action Center — ported from ActionCenter.svelte
-//  + extras: volume, brightness, wifi, battery
+//  Action Center — iOS-style layout
 // ─────────────────────────────────────────────
-const ACCENT_COLORS = [
-    { name: "Blue", value: "#0a84ff" },
-    { name: "Purple", value: "#bf5af2" },
-    { name: "Pink", value: "#ff375f" },
-    { name: "Red", value: "#ff3b30" },
-    { name: "Orange", value: "#ff9f0a" },
-    { name: "Yellow", value: "#ffd60a" },
-    { name: "Green", value: "#30d158" },
-    { name: "Teal", value: "#5ac8fa" },
-];
 function buildActionCenter() {
-    let panel = document.getElementById("actionCenter");
-    if (panel)
-        panel.remove();
-    panel = document.createElement("section");
+    document.getElementById("actionCenter")?.remove();
+    const panel = document.createElement("div");
     panel.id = "actionCenter";
     panel.className = "ac-panel";
+    panel.addEventListener("click", (e) => e.stopPropagation());
     panel.innerHTML = `
-    <!-- Row 1: Dark Mode + Animations (2 tiles side by side) -->
-    <div class="ac-grid">
+    <div class="ac-body">
 
-      <!-- Dark Mode -->
-      <div class="ac-surface ac-half" id="acDarkMode">
-        <button class="ac-tile-btn" id="acDarkBtn">
-          <span class="ac-toggle-icon" id="acDarkIcon">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 3a9 9 0 100 18A9 9 0 0012 3zm0 16a7 7 0 010-14v14z"/></svg>
+      <!-- ROW 1: Wi-Fi pill (wide) + Now Playing (right) -->
+      <div class="ac-row">
+        <!-- Wi-Fi pill — wide, shows network name below -->
+        <button class="ac-pill ac-pill-wide ac-on" id="acWifiBtn">
+          <span class="ac-pill-icon" id="acWifiIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
           </span>
-          <span class="ac-tile-label">Dark Mode</span>
+          <span class="ac-pill-text">
+            <span class="ac-pill-title">Wi-Fi</span>
+            <span class="ac-pill-sub" id="acWifiSub">Home</span>
+          </span>
         </button>
-      </div>
 
-      <!-- Do Not Disturb -->
-      <div class="ac-surface ac-half" id="acDND">
-        <button class="ac-tile-btn" id="acDNDBtn">
-          <span class="ac-toggle-icon" id="acDNDIcon">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-          </span>
-          <span class="ac-tile-label">Focus</span>
-        </button>
-      </div>
-
-      <!-- Wi-Fi -->
-      <div class="ac-surface ac-half" id="acWifi">
-        <button class="ac-tile-btn" id="acWifiBtn">
-          <span class="ac-toggle-icon ac-toggle-on" id="acWifiIcon">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
-          </span>
-          <span class="ac-tile-label">Wi-Fi</span>
-        </button>
-      </div>
-
-      <!-- Bluetooth -->
-      <div class="ac-surface ac-half" id="acBluetooth">
-        <button class="ac-tile-btn" id="acBTBtn">
-          <span class="ac-toggle-icon ac-toggle-on" id="acBTIcon">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
-          </span>
-          <span class="ac-tile-label">Bluetooth</span>
-        </button>
-      </div>
-
-      <!-- Animations toggle (EXTRA) -->
-      <div class="ac-surface ac-half" id="acAnim">
-        <button class="ac-tile-btn ac-toggle-on" id="acAnimBtn">
-          <span class="ac-toggle-icon ac-toggle-on" id="acAnimIcon">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19.5 9.5c-1.03 0-1.9.62-2.29 1.5h-2.92c-.39-.88-1.26-1.5-2.29-1.5s-1.9.62-2.29 1.5H7.79C7.4 10.12 6.53 9.5 5.5 9.5 4.12 9.5 3 10.62 3 12s1.12 2.5 2.5 2.5c1.03 0 1.9-.62 2.29-1.5h2.92c.39.88 1.26 1.5 2.29 1.5s1.9-.62 2.29-1.5h2.92c.39.88 1.26 1.5 2.29 1.5 1.38 0 2.5-1.12 2.5-2.5S20.88 9.5 19.5 9.5z"/></svg>
-          </span>
-          <span class="ac-tile-label">Animations</span>
-        </button>
-      </div>
-
-      <!-- Battery (EXTRA) -->
-      <div class="ac-surface ac-half" id="acBattery">
-        <div class="ac-tile-btn" style="cursor:default;">
-          <span class="ac-toggle-icon" style="background:rgba(255,255,255,0.08);">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-          </span>
-          <span class="ac-tile-label">Battery <strong id="acBatPct" style="color:#30d158">${MB.batteryPct}%</strong></span>
+        <!-- Now Playing card -->
+        <div class="ac-now-playing" id="acNowPlaying">
+          <div class="ac-np-art">🎵</div>
+          <div class="ac-np-info">
+            <div class="ac-np-title" id="acNpTitle">${MB.nowPlaying.title}</div>
+            <div class="ac-np-artist" id="acNpArtist">${MB.nowPlaying.artist}</div>
+          </div>
+          <div class="ac-np-controls">
+            <button class="ac-np-btn" id="acPrev">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="ac-np-btn ac-np-play" id="acPlay">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" id="acPlayIcon"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="ac-np-btn" id="acNext">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Volume slider (EXTRA) -->
-      <div class="ac-surface ac-full">
-        <div class="ac-slider-row">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" style="flex-shrink:0;opacity:.7"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.97z"/></svg>
-          <input type="range" class="ac-slider" id="acVolume" min="0" max="100" value="${MB.volume}" />
-          <span class="ac-slider-val" id="acVolumeVal">${MB.volume}</span>
+      <!-- ROW 2: Bluetooth + AirDrop circles -->
+      <div class="ac-row">
+        <button class="ac-circle ac-on" id="acBTBtn">
+          <span class="ac-circle-icon" id="acBTIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
+          </span>
+          <span class="ac-circle-label">Bluetooth</span>
+        </button>
+        <button class="ac-circle ac-on" id="acAirdropBtn">
+          <span class="ac-circle-icon" id="acAirdropIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8l7 4-7 4v-3.86l3.72-1.14L8 10.14V16z"/></svg>
+          </span>
+          <span class="ac-circle-label">AirDrop</span>
+        </button>
+        <!-- Focus pill — wide -->
+        <button class="ac-pill ac-pill-focus" id="acFocusBtn">
+          <span class="ac-pill-icon" id="acFocusIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          </span>
+          <span class="ac-pill-text">
+            <span class="ac-pill-title">Focus</span>
+            <span class="ac-pill-sub" id="acFocusSub">Off</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- ROW 3: Screen Mirroring + Display mode circles -->
+      <div class="ac-row">
+        <button class="ac-circle" id="acMirrorBtn">
+          <span class="ac-circle-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zm-8-2v-4l4 2-4 2zM7 8h2v8H7z"/></svg>
+          </span>
+          <span class="ac-circle-label">Mirroring</span>
+        </button>
+        <button class="ac-circle" id="acDisplayBtn">
+          <span class="ac-circle-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15c0-2.21 1.79-4 4-4s4 1.79 4 4"/></svg>
+          </span>
+          <span class="ac-circle-label">Display</span>
+        </button>
+        <button class="ac-circle" id="acDarkBtn">
+          <span class="ac-circle-icon" id="acDarkIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 3a9 9 0 100 18A9 9 0 0012 3zm0 16a7 7 0 010-14v14z"/></svg>
+          </span>
+          <span class="ac-circle-label">Dark Mode</span>
+        </button>
+      </div>
+
+      <!-- ROW 4: Display brightness slider -->
+      <div class="ac-slider-card">
+        <div class="ac-slider-header">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>
+          <span>Display</span>
+        </div>
+        <div class="ac-slider-track">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" style="opacity:.5"><circle cx="12" cy="12" r="5"/></svg>
+          <input type="range" class="ac-slider-input" id="acBrightness" min="0" max="100" value="${MB.brightness}" />
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="opacity:.9"><path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
         </div>
       </div>
 
-      <!-- Brightness slider (EXTRA) -->
-      <div class="ac-surface ac-full">
-        <div class="ac-slider-row">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" style="flex-shrink:0;opacity:.7"><path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>
-          <input type="range" class="ac-slider" id="acBrightness" min="0" max="100" value="${MB.brightness}" />
-          <span class="ac-slider-val" id="acBrightnessVal">${MB.brightness}</span>
+      <!-- ROW 5: Sound volume slider -->
+      <div class="ac-slider-card">
+        <div class="ac-slider-header">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+          <span>Sound</span>
+        </div>
+        <div class="ac-slider-track">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" style="opacity:.5"><path d="M7 9v6h4l5 5V4l-5 5H7z"/></svg>
+          <input type="range" class="ac-slider-input" id="acVolume" min="0" max="100" value="${MB.volume}" />
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="opacity:.9"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.97z"/></svg>
         </div>
       </div>
 
-      <!-- Accent Color picker — mirrors ActionCenter color palette -->
-      <div class="ac-surface ac-full">
-        <p class="ac-section-title">Accent Colour</p>
-        <div class="ac-color-row" id="acColorRow"></div>
+      <!-- ROW 6: Bottom utility circles -->
+      <div class="ac-row ac-row-utilities">
+        <button class="ac-util-circle" id="acDarkModeUtil" title="Dark Mode">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 3a9 9 0 100 18A9 9 0 0012 3zm0 16a7 7 0 010-14v14z"/></svg>
+        </button>
+        <button class="ac-util-circle" title="Calculator">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+        </button>
+        <button class="ac-util-circle" title="Timer">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </button>
+        <button class="ac-util-circle" title="Screenshot">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/></svg>
+        </button>
       </div>
+
+      <!-- Edit Controls hint -->
+      <div class="ac-edit-controls">Edit Controls</div>
 
     </div>
   `;
     document.getElementById("desktop")?.appendChild(panel);
-    // Wire sliders
-    const volSlider = document.getElementById("acVolume");
-    volSlider?.addEventListener("input", () => {
-        MB.volume = +volSlider.value;
-        const el = document.getElementById("acVolumeVal");
-        if (el)
-            el.textContent = String(MB.volume);
+    // ── Wire all controls ──
+    // Wi-Fi
+    document.getElementById("acWifiBtn")?.addEventListener("click", () => {
+        MB.wifi = !MB.wifi;
+        const btn = document.getElementById("acWifiBtn");
+        btn?.classList.toggle("ac-on", MB.wifi);
+        document.getElementById("acWifiSub").textContent = MB.wifi ? "Home" : "Off";
+        document.getElementById("mbWifi").style.opacity = MB.wifi ? "1" : "0.35";
     });
+    // Bluetooth
+    document.getElementById("acBTBtn")?.addEventListener("click", () => {
+        MB.bluetooth = !MB.bluetooth;
+        document.getElementById("acBTBtn")?.classList.toggle("ac-on", MB.bluetooth);
+    });
+    // AirDrop
+    document.getElementById("acAirdropBtn")?.addEventListener("click", () => {
+        MB.airdrop = !MB.airdrop;
+        document.getElementById("acAirdropBtn")?.classList.toggle("ac-on", MB.airdrop);
+    });
+    // Focus
+    document.getElementById("acFocusBtn")?.addEventListener("click", () => {
+        MB.doNotDisturb = !MB.doNotDisturb;
+        document.getElementById("acFocusBtn")?.classList.toggle("ac-on", MB.doNotDisturb);
+        document.getElementById("acFocusSub").textContent = MB.doNotDisturb ? "On" : "Off";
+    });
+    // Dark Mode
+    const darkToggle = () => {
+        MB.darkMode = !MB.darkMode;
+        document.getElementById("desktop")?.classList.toggle("dark-mode", MB.darkMode);
+        document.getElementById("acDarkBtn")?.classList.toggle("ac-on", MB.darkMode);
+        document.getElementById("acDarkModeUtil")?.classList.toggle("ac-util-on", MB.darkMode);
+    };
+    document.getElementById("acDarkBtn")?.addEventListener("click", darkToggle);
+    document.getElementById("acDarkModeUtil")?.addEventListener("click", darkToggle);
+    // Brightness
     const briSlider = document.getElementById("acBrightness");
     briSlider?.addEventListener("input", () => {
         MB.brightness = +briSlider.value;
-        const el = document.getElementById("acBrightnessVal");
-        if (el)
-            el.textContent = String(MB.brightness);
-        document.getElementById("wallpaperLayer").style.filter = `brightness(${0.4 + MB.brightness / 100 * 0.75})`;
+        const wl = document.getElementById("wallpaperLayer");
+        if (wl)
+            wl.style.filter = `brightness(${0.45 + MB.brightness / 100 * 0.65})`;
     });
-    // Wire toggles
-    document.getElementById("acDarkBtn")?.addEventListener("click", () => {
-        MB.darkMode = !MB.darkMode;
-        applyDarkMode();
-        refreshToggleIcon("acDarkIcon", MB.darkMode);
+    // Volume
+    const volSlider = document.getElementById("acVolume");
+    volSlider?.addEventListener("input", () => { MB.volume = +volSlider.value; });
+    // Now Playing controls
+    document.getElementById("acPlay")?.addEventListener("click", () => {
+        MB.nowPlaying.playing = !MB.nowPlaying.playing;
+        const icon = document.getElementById("acPlayIcon");
+        if (icon)
+            icon.innerHTML = MB.nowPlaying.playing
+                ? `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`
+                : `<path d="M8 5v14l11-7z"/>`;
     });
-    document.getElementById("acDNDBtn")?.addEventListener("click", () => {
-        MB.doNotDisturb = !MB.doNotDisturb;
-        refreshToggleIcon("acDNDIcon", MB.doNotDisturb);
+    // Screenshot
+    document.querySelector('[title="Screenshot"]')?.addEventListener("click", () => {
+        document.getElementById("actionCenter")?.classList.remove("open");
+        MB.actionCenterOpen = false;
+        setTimeout(() => alert("Screenshot saved to Desktop! (demo)"), 300);
     });
-    document.getElementById("acWifiBtn")?.addEventListener("click", () => {
-        MB.wifi = !MB.wifi;
-        refreshToggleIcon("acWifiIcon", MB.wifi);
-        const wifiStatus = document.getElementById("mbWifi");
-        if (wifiStatus)
-            wifiStatus.style.opacity = MB.wifi ? "1" : "0.3";
-    });
-    document.getElementById("acBTBtn")?.addEventListener("click", () => {
-        MB.bluetooth = !MB.bluetooth;
-        refreshToggleIcon("acBTIcon", MB.bluetooth);
-    });
-    document.getElementById("acAnimBtn")?.addEventListener("click", () => {
-        MB.animations = !MB.animations;
-        refreshToggleIcon("acAnimIcon", MB.animations);
-    });
-    // Color palette
-    const colorRow = document.getElementById("acColorRow");
-    ACCENT_COLORS.forEach(c => {
-        const btn = document.createElement("button");
-        btn.className = "ac-color-dot" + (MB.accentColor === c.value ? " selected" : "");
-        btn.style.background = c.value;
-        btn.title = c.name;
-        btn.addEventListener("click", () => {
-            MB.accentColor = c.value;
-            document.documentElement.style.setProperty("--accent", c.value);
-            colorRow?.querySelectorAll(".ac-color-dot").forEach(b => b.classList.remove("selected"));
-            btn.classList.add("selected");
-        });
-        colorRow?.appendChild(btn);
-    });
-    // Close on outside click
-    panel.addEventListener("click", (e) => e.stopPropagation());
-}
-function refreshToggleIcon(id, on) {
-    document.getElementById(id)?.classList.toggle("ac-toggle-on", on);
-}
-function applyDarkMode() {
-    document.getElementById("desktop")?.classList.toggle("dark-mode", MB.darkMode);
 }
 function toggleActionCenter() {
     MB.actionCenterOpen = !MB.actionCenterOpen;
@@ -443,16 +441,9 @@ function toggleActionCenter() {
     const btn = document.getElementById("acToggleBtn");
     if (!panel)
         return;
-    if (MB.actionCenterOpen) {
-        panel.classList.add("open");
-        btn?.classList.add("menu-active");
-    }
-    else {
-        panel.classList.remove("open");
-        btn?.classList.remove("menu-active");
-    }
+    panel.classList.toggle("open", MB.actionCenterOpen);
+    btn?.classList.toggle("menu-active", MB.actionCenterOpen);
 }
-// Close action center on outside click
 document.addEventListener("click", () => {
     if (!MB.actionCenterOpen)
         return;
@@ -460,24 +451,17 @@ document.addEventListener("click", () => {
     document.getElementById("actionCenter")?.classList.remove("open");
     document.getElementById("acToggleBtn")?.classList.remove("menu-active");
 });
-// ─────────────────────────────────────────────
-//  Clock — format matches TopBarTime.svelte (date-fns format)
-// ─────────────────────────────────────────────
+// ── Clock ──
 function updateClock() {
     const el = document.getElementById("menuClock");
     if (!el)
         return;
     const now = new Date();
-    const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const MONS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const D = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const h = now.getHours(), m = now.getMinutes().toString().padStart(2, "0");
-    const ampm = h >= 12 ? "PM" : "AM";
-    const h12 = (h % 12) || 12;
-    el.textContent = `${DAYS[now.getDay()]} ${MONS[now.getMonth()]} ${now.getDate()}   ${h12}:${m} ${ampm}`;
+    el.textContent = `${D[now.getDay()]} ${M[now.getMonth()]} ${now.getDate()}   ${(h % 12) || 12}:${m} ${h >= 12 ? "PM" : "AM"}`;
 }
-// ─────────────────────────────────────────────
-//  Init
-// ─────────────────────────────────────────────
 buildMenuBar();
 updateClock();
 setInterval(updateClock, 15000);
