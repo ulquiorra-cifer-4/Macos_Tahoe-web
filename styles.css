@@ -16,6 +16,7 @@ html, body {
   overflow: hidden;
   font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
+  cursor: url('cursor.svg') 0 0, auto;
 }
 
 /* ── Desktop ── */
@@ -24,8 +25,8 @@ html, body {
   width: 100vw; height: 100vh;
   background: #1e3a5f;
   overflow: hidden;
-  cursor: default;
   user-select: none;
+  cursor: url('cursor.svg') 0 0, auto;
 }
 
 /* ── Wallpaper ── */
@@ -50,10 +51,10 @@ html, body {
   border-bottom: .5px solid rgba(255,255,255,0.2);
 }
 .menu-left, .menu-right { display: flex; align-items: center; gap: 4px; }
-.apple-menu { display: flex; align-items: center; padding: 0 8px; color: white; cursor: pointer; }
+.apple-menu { display: flex; align-items: center; padding: 0 8px; color: white; cursor: url('cursor.svg') 0 0, pointer; }
 .menu-item {
   padding: 2px 8px; font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.9);
-  border-radius: 4px; cursor: pointer; transition: background .1s;
+  border-radius: 4px; cursor: url('cursor.svg') 0 0, pointer; transition: background .1s;
 }
 .menu-item:hover { background: rgba(255,255,255,0.15); }
 .menu-item.active { font-weight: 600; }
@@ -98,7 +99,7 @@ html, body {
 .cal-header { font-size: 10px; font-weight: 700; color: #ff453a; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; text-align: center; }
 .cal-dow { font-size: 9px; color: rgba(255,255,255,0.45); font-weight: 600; padding-bottom: 2px; }
-.cal-day { font-size: 11px; color: rgba(255,255,255,0.8); padding: 2px 0; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin: auto; cursor: pointer; transition: background .15s; }
+.cal-day { font-size: 11px; color: rgba(255,255,255,0.8); padding: 2px 0; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin: auto; cursor: url('cursor.svg') 0 0, pointer; transition: background .15s; }
 .cal-day:hover { background: rgba(255,255,255,0.15); }
 .cal-day.today { background: #ff453a; color: white; font-weight: 700; }
 .cal-day.other-month { color: rgba(255,255,255,0.2); }
@@ -181,7 +182,7 @@ html, body {
   background: none;
   border: none;
   padding: 0;
-  cursor: pointer;
+  cursor: url('cursor.svg') 0 0, pointer;
   flex-shrink: 0;
   overflow: visible;
 }
@@ -283,7 +284,7 @@ html, body {
   /* dark border */
   outline: 0.5px solid rgba(0,0,0,0.25);
 
-  cursor: default;
+  cursor: url('cursor.svg') 0 0, default;
   user-select: none;
 }
 
@@ -298,10 +299,10 @@ html, body {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 44px;
-  cursor: grab;
+  cursor: url('cursor.svg') 0 0, grab;
   z-index: 1;
 }
-.app-window-drag-handle:active { cursor: grabbing; }
+.app-window-drag-handle:active { cursor: url('cursor.svg') 0 0, grabbing; }
 
 /* ── Traffic Lights — ported from TrafficLights.svelte ── */
 .tl-container {
@@ -325,7 +326,7 @@ html, body {
   height: var(--btn-size, 0.78rem);
   border-radius: 50%;
   border: none;
-  cursor: pointer;
+  cursor: url('cursor.svg') 0 0, pointer;
   display: flex; align-items: center; justify-content: center;
   transition: transform 100ms ease-in;
   position: relative;
@@ -398,12 +399,12 @@ html, body {
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: url('cursor.svg') 0 0, pointer;
   transition: background 0.15s, opacity 0.15s;
 }
 .finder-btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
 .finder-btn.disabled, .finder-btn:disabled {
-  opacity: 0.35; cursor: default; pointer-events: none;
+  opacity: 0.35; cursor: url('cursor.svg') 0 0, default; pointer-events: none;
 }
 
 .empty-btn {
@@ -449,7 +450,7 @@ html, body {
   color: rgba(255,255,255,0.65);
   border-radius: 6px;
   margin: 1px 6px;
-  cursor: pointer;
+  cursor: url('cursor.svg') 0 0, pointer;
   transition: background 0.1s;
 }
 .sidebar-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
@@ -491,7 +492,7 @@ html, body {
   padding: 7px 16px;
   border-radius: 6px;
   margin: 1px 6px;
-  cursor: default;
+  cursor: url('cursor.svg') 0 0, default;
   transition: background 0.1s;
   font-size: 12.5px;
   color: rgba(255,255,255,0.78);
@@ -581,7 +582,7 @@ html, body {
   border-radius: 0.25rem;
   font-size: 0.82rem; font-weight: 500;
   color: rgba(255,255,255,0.92);
-  background: none; border: none; cursor: default;
+  background: none; border: none; cursor: url('cursor.svg') 0 0, default;
   white-space: nowrap;
   transition: background 80ms ease;
 }
@@ -609,7 +610,7 @@ html, body {
   display: flex; justify-content: space-between; align-items: center;
   width: 100%; padding: 0.22rem 0.55rem; margin: 0.05rem 0;
   font-size: 0.85rem; font-weight: 400; color: rgba(255,255,255,0.88);
-  border-radius: 0.3rem; background: none; border: none; cursor: default; text-align: left;
+  border-radius: 0.3rem; background: none; border: none; cursor: url('cursor.svg') 0 0, default; text-align: left;
   transition: background 60ms ease;
 }
 .menu-dropdown-item:not(:disabled):hover { background: var(--accent,#0a84ff); color: #fff; }
@@ -623,12 +624,12 @@ html, body {
   display: flex; align-items: center; gap: 4px;
   height: 100%; padding: 0 5px;
   font-size: 0.78rem; color: rgba(255,255,255,0.88);
-  background: none; border: none; cursor: default;
+  background: none; border: none; cursor: url('cursor.svg') 0 0, default;
   border-radius: 0.25rem; white-space: nowrap;
 }
 .menu-status:hover, .menu-status.menu-active { background: rgba(255,255,255,0.18); }
-.menu-clock { font-size: 0.78rem; font-weight: 500; cursor: default; }
-.ac-toggle  { cursor: pointer; }
+.menu-clock { font-size: 0.78rem; font-weight: 500; cursor: url('cursor.svg') 0 0, default; }
+.ac-toggle  { cursor: url('cursor.svg') 0 0, pointer; }
 
 /* ============================================================
    ACTION CENTER — iOS-style panel
@@ -668,7 +669,7 @@ html, body {
   display: flex; align-items: center; gap: 10px;
   padding: 0.55rem 0.75rem;
   background: rgba(255,255,255,0.09);
-  border: none; border-radius: 14px; cursor: pointer;
+  border: none; border-radius: 14px; cursor: url('cursor.svg') 0 0, pointer;
   transition: background 150ms ease, transform 80ms ease;
   text-align: left; color: rgba(255,255,255,0.85);
 }
@@ -697,7 +698,7 @@ html, body {
   border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   background: rgba(255,255,255,0.09);
-  border: none; cursor: pointer;
+  border: none; cursor: url('cursor.svg') 0 0, pointer;
   transition: background 150ms ease, transform 80ms ease;
   flex-shrink: 0;
   position: relative;
@@ -736,7 +737,7 @@ html, body {
 .ac-np-controls { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .ac-np-btn {
   width: 1.6rem; height: 1.6rem; border-radius: 50%;
-  background: rgba(255,255,255,0.12); border: none; cursor: pointer;
+  background: rgba(255,255,255,0.12); border: none; cursor: url('cursor.svg') 0 0, pointer;
   display: flex; align-items: center; justify-content: center;
   color: #fff; transition: background 120ms ease, transform 80ms ease;
 }
@@ -765,14 +766,14 @@ html, body {
   -webkit-appearance: none; appearance: none;
   height: 5px; border-radius: 3px;
   background: rgba(255,255,255,0.22);
-  outline: none; cursor: pointer;
+  outline: none; cursor: url('cursor.svg') 0 0, pointer;
 }
 .ac-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 18px; height: 18px; border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 5px rgba(0,0,0,0.45);
-  cursor: pointer;
+  cursor: url('cursor.svg') 0 0, pointer;
 }
 
 /* ── Utility circles row (bottom) ── */
@@ -780,7 +781,7 @@ html, body {
 .ac-util-circle {
   width: 3rem; height: 3rem; border-radius: 50%;
   background: rgba(255,255,255,0.09);
-  border: none; cursor: pointer;
+  border: none; cursor: url('cursor.svg') 0 0, pointer;
   display: flex; align-items: center; justify-content: center;
   color: rgba(255,255,255,0.75);
   transition: background 150ms ease, transform 80ms ease;
@@ -795,7 +796,7 @@ html, body {
   font-size: 0.72rem; font-weight: 500;
   color: rgba(255,255,255,0.35);
   padding: 0.15rem 0 0.05rem;
-  cursor: pointer;
+  cursor: url('cursor.svg') 0 0, pointer;
   transition: color 150ms ease;
 }
 .ac-edit-controls:hover { color: rgba(255,255,255,0.65); }
@@ -803,3 +804,17 @@ html, body {
 /* ── Dark Mode ── */
 #desktop.dark-mode #menuBar::before { background: rgba(0,0,0,0.45); }
 #desktop.dark-mode .ac-panel { background: rgba(18,18,22,0.82); }
+
+/* ── Custom cursor — applies globally, overrides everything ──
+   Place cursor.svg in the root directory next to index.html  */
+*, *::before, *::after {
+  cursor: url('cursor.svg') 0 0, auto !important;
+}
+
+/* Drag handle keeps grab feel visually but still uses custom cursor */
+.app-window-drag-handle {
+  cursor: url('cursor.svg') 0 0, grab !important;
+}
+.app-window-drag-handle:active {
+  cursor: url('cursor.svg') 0 0, grabbing !important;
+}
