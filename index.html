@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="/icons/finder.png" />
   <title>macOS Tahoe — Web Emulator</title>
-  <link rel="apple-touch-icon" href="/icons/finder.png"/>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="apps/notes/notes.css" />
 </head>
 <body>
 
@@ -16,6 +15,7 @@
 
     <!-- Menu Bar — built dynamically by menubar.js -->
     <div id="menuBar"></div>
+
 
     <!-- Windows Area -->
     <div id="windows-area"></div>
@@ -28,6 +28,9 @@
 
   <script src="window-manager.js"></script>
   <script src="apps/trash.js"></script>
+  <script src="apps/notes/notes-store.js"></script>
+  <script src="apps/notes/notes-editor.js"></script>
+  <script src="apps/notes/notes-app.js"></script>
   <script src="menubar.js"></script>
   <script src="dock.js"></script>
 </body>
