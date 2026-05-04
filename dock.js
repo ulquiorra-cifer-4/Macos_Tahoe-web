@@ -117,6 +117,9 @@ function buildDock() {
             if (icon.id === "notes" && typeof window.openNotesWindow === "function") {
                 window.openNotesWindow();
             }
+            if (icon.id === "finder" && typeof window.openFinderWindow === "function") {
+                window.openFinderWindow();
+            }
         });
         dock.appendChild(wrap);
         iconStates.push(state);
