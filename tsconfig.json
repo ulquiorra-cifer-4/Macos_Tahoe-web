@@ -15,6 +15,12 @@
     "apps/trash.ts",
     "apps/notes/notes-store.ts",
     "apps/notes/notes-editor.ts",
-    "apps/notes/notes-app.ts"
+    "apps/notes/notes-app.ts",
+    "apps/finder/finder-fs.ts",
+    "apps/finder/finder-sidebar.ts",
+    "apps/finder/finder-toolbar.ts",
+    "apps/finder/finder-grid.ts",
+    "apps/finder/finder-preview.ts",
+    "apps/finder/finder-app.ts"
   ]
 }
