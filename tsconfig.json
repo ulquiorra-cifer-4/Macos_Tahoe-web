@@ -12,6 +12,7 @@
     "dock.ts",
     "window-manager.ts",
     "menubar.ts",
+    "desktop-manager.ts",
     "apps/trash.ts",
     "apps/notes/notes-store.ts",
     "apps/notes/notes-editor.ts",
