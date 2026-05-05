@@ -40,6 +40,7 @@ class FinderApp {
             onSearch: (q) => {
                 if (!q) {
                     this.grid.load(this.currentFolderId, this.viewMode);
+                    _trackFinderFolder(this.currentFolderId);
                     return;
                 }
                 const results = this.fs.search(q);
@@ -171,6 +172,7 @@ class FinderApp {
     }
     _renderCurrent() {
         this.grid.load(this.currentFolderId, this.viewMode);
+        _trackFinderFolder(this.currentFolderId);
         // Breadcrumb
         const path = this.fs.getPath(this.currentFolderId);
         const bc = ["iCloud Drive", ...path.map((n) => n.name)];
@@ -272,6 +274,18 @@ class FinderApp {
 }
 // ── Register globally ──
 window.openFinderWindow = function () {
+    // If already open, just navigate
+    const existing = window.__finderAppInstance;
+    if (existing) {
+        const navTo = window.__finderNavigateTo;
+        if (navTo) {
+            const node = window.__finderFS?.getNode(navTo);
+            if (node)
+                existing._navigateTo(navTo, node.name);
+            window.__finderNavigateTo = null;
+        }
+        return;
+    }
     window.__createWindow({
         appId: "finder",
         title: "Finder",
@@ -279,7 +293,19 @@ window.openFinderWindow = function () {
         height: 580,
         content: (_win) => {
             const app = new FinderApp();
+            window.__finderAppInstance = app;
+            const navTo = window.__finderNavigateTo;
+            if (navTo) {
+                const node = window.__finderFS?.getNode(navTo);
+                if (node)
+                    setTimeout(() => app._navigateTo(navTo, node.name), 50);
+                window.__finderNavigateTo = null;
+            }
             return app.el;
         },
     });
 };
+// Expose current folder so desktop-manager can drop into it
+function _trackFinderFolder(folderId) {
+    window.__finderCurrentFolder = folderId;
+}
