@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>macOS Tahoe — Web Emulator</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="desktop.css" />
   <link rel="stylesheet" href="apps/notes/notes.css" />
   <link rel="stylesheet" href="apps/finder/finder.css" />
 </head>
 <body>
-
   <div id="desktop">
+
     <!-- Wallpaper -->
     <div id="wallpaperLayer"></div>
 
-    <!-- Menu Bar — built dynamically by menubar.js -->
+    <!-- Menu Bar — built by menubar.js -->
     <div id="menuBar"></div>
-
 
     <!-- Windows Area -->
     <div id="windows-area"></div>
@@ -25,9 +25,13 @@
     <div id="dockContainer">
       <div id="dock"></div>
     </div>
+
   </div>
 
+  <!-- Core -->
   <script src="window-manager.js"></script>
+
+  <!-- Apps -->
   <script src="apps/trash.js"></script>
   <script src="apps/notes/notes-store.js"></script>
   <script src="apps/notes/notes-editor.js"></script>
@@ -38,7 +42,21 @@
   <script src="apps/finder/finder-grid.js"></script>
   <script src="apps/finder/finder-preview.js"></script>
   <script src="apps/finder/finder-app.js"></script>
+
+  <!-- Desktop manager — needs FS loaded first -->
+  <script src="desktop-manager.js"></script>
+
+  <!-- Menu bar + Dock — last so everything is registered -->
   <script src="menubar.js"></script>
   <script src="dock.js"></script>
+
+  <!-- Boot desktop manager after all scripts are ready -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof window.__initDesktopManager === "function") {
+        window.__initDesktopManager();
+      }
+    });
+  </script>
 </body>
 </html>
