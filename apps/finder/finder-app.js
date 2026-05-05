@@ -274,9 +274,12 @@ class FinderApp {
 }
 // ── Register globally ──
 window.openFinderWindow = function () {
-    // If already open, just navigate
+    // Check if instance exists AND its DOM element is still in the document
     const existing = window.__finderAppInstance;
-    if (existing) {
+    const winEl = existing?.el?.closest(".app-window");
+    const isAlive = winEl && document.contains(winEl);
+    if (isAlive) {
+        // Window is open — just navigate if needed
         const navTo = window.__finderNavigateTo;
         if (navTo) {
             const node = window.__finderFS?.getNode(navTo);
@@ -286,6 +289,8 @@ window.openFinderWindow = function () {
         }
         return;
     }
+    // Clear stale instance before creating new one
+    window.__finderAppInstance = null;
     window.__createWindow({
         appId: "finder",
         title: "Finder",
