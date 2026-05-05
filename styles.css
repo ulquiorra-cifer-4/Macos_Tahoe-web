@@ -818,3 +818,26 @@ html, body {
 .app-window-drag-handle:active {
   cursor: url('cursor.svg') 0 0, grabbing !important;
 }
+
+/* ── Menu bar PNG status icons (battery, action-center) ── */
+.mb-status-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+  /* Invert to white since menu bar is always dark-ish */
+  filter: brightness(0) invert(1);
+  opacity: 0.88;
+  transition: opacity 0.2s ease;
+}
+.menu-status:hover .mb-status-icon { opacity: 1; }
+
+/* ── Dock icon crossfade during dark mode switch ── */
+.dock-item img {
+  transition: opacity 0.22s ease;
+}
+
+/* ── Dock dark mode pill — set base so JS transition works ── */
+#dock {
+  will-change: background, box-shadow;
+}
