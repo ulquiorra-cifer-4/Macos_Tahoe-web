@@ -141,6 +141,64 @@ interface MenuItem {
 }
 
 // ─────────────────────────────────────────────
+//  Dark Mode — switches desktop class, dock icons, dock glass
+// ─────────────────────────────────────────────
+function applyDarkMode(dark: boolean): void {
+  const desktop = document.getElementById("desktop");
+  desktop?.classList.toggle("dark-mode", dark);
+
+  // ── Switch dock icon images ──
+  document.querySelectorAll<HTMLImageElement>(".dock-item img").forEach(img => {
+    const src = img.getAttribute("src") ?? "";
+    if (dark) {
+      // light → dark:  icons/finder.png  →  dark-icons/finder-dark.png
+      const darkSrc = src.replace(/^icons\//, "dark-icons/").replace(/\.png$/, "-dark.png");
+      _swapImg(img, darkSrc, src);
+    } else {
+      // dark → light:  dark-icons/finder-dark.png  →  icons/finder.png
+      const lightSrc = src.replace(/^dark-icons\//, "icons/").replace(/-dark\.png$/, ".png");
+      _swapImg(img, lightSrc, src);
+    }
+  });
+
+  // ── Dock pill transparency ──
+  const dock = document.getElementById("dock");
+  if (dock) {
+    dock.style.transition = "background 0.45s ease, box-shadow 0.45s ease, backdrop-filter 0.45s ease";
+    if (dark) {
+      dock.style.background      = "rgba(30,30,34,0.35)";
+      dock.style.backdropFilter  = "blur(48px) saturate(120%) brightness(80%)";
+      (dock.style as any).webkitBackdropFilter = "blur(48px) saturate(120%) brightness(80%)";
+      dock.style.boxShadow       = "inset 0 0 0 0.5px rgba(255,255,255,0.12), 0 0 0 0.5px rgba(0,0,0,0.6), rgba(0,0,0,0.5) 2px 5px 24px 8px";
+    } else {
+      dock.style.background      = "rgba(255,255,255,0.25)";
+      dock.style.backdropFilter  = "blur(10px)";
+      (dock.style as any).webkitBackdropFilter = "blur(10px)";
+      dock.style.boxShadow       = "inset 0 0 0 0.2px rgba(255,255,255,0.7), 0 0 0 0.2px rgba(0,0,0,0.7), rgba(0,0,0,0.3) 2px 5px 19px 7px";
+    }
+    setTimeout(() => { dock.style.transition = ""; }, 480);
+  }
+}
+
+function _swapImg(img: HTMLImageElement, newSrc: string, fallback: string): void {
+  // Crossfade: fade out → swap → fade in
+  img.style.transition = "opacity 0.22s ease";
+  img.style.opacity    = "0";
+  setTimeout(() => {
+    const probe = new Image();
+    probe.onload = () => {
+      img.src = newSrc;
+      img.style.opacity = "1";
+    };
+    probe.onerror = () => {
+      // Dark icon not found — keep original, restore opacity
+      img.style.opacity = "1";
+    };
+    probe.src = newSrc;
+  }, 200);
+}
+
+// ─────────────────────────────────────────────
 //  Build Menu Bar
 // ─────────────────────────────────────────────
 function buildMenuBar(): void {
@@ -177,10 +235,10 @@ function buildMenuBar(): void {
   const right = document.createElement("div");
   right.className = "menu-right";
 
-  // Battery icon
+  // Battery icon — uses uploaded battery.png
   const batEl = document.createElement("span");
   batEl.className = "menu-status";
-  batEl.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg><span>${MB.batteryPct}%</span>`;
+  batEl.innerHTML = `<img src="icons/battery.png" class="mb-status-icon" alt="Battery" id="mbBatteryIcon" /><span>${MB.batteryPct}%</span>`;
 
   // Wifi
   const wifiEl = document.createElement("span");
@@ -188,11 +246,11 @@ function buildMenuBar(): void {
   wifiEl.id = "mbWifi";
   wifiEl.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>`;
 
-  // Action center toggle button (grid icon)
+  // Action center toggle — uses uploaded action-center.png
   const acBtn = document.createElement("button");
   acBtn.className = "menu-status ac-toggle";
   acBtn.id = "acToggleBtn";
-  acBtn.innerHTML = `<svg viewBox="0 0 18 18" fill="currentColor" width="14" height="14"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="11" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>`;
+  acBtn.innerHTML = `<img src="icons/action-center.png" class="mb-status-icon" alt="Control Centre" id="mbACIcon" />`;
   acBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleActionCenter(); });
 
   // Clock
@@ -429,10 +487,10 @@ function buildActionCenter(): void {
     document.getElementById("acFocusSub")!.textContent = MB.doNotDisturb ? "On" : "Off";
   });
 
-  // Dark Mode
+  // Dark Mode — switches dock icons + dock transparency
   const darkToggle = () => {
     MB.darkMode = !MB.darkMode;
-    document.getElementById("desktop")?.classList.toggle("dark-mode", MB.darkMode);
+    applyDarkMode(MB.darkMode);
     document.getElementById("acDarkBtn")?.classList.toggle("ac-on", MB.darkMode);
     document.getElementById("acDarkModeUtil")?.classList.toggle("ac-util-on", MB.darkMode);
   };
