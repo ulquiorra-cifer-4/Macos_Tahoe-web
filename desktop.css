@@ -1,0 +1,298 @@
+/* ============================================================
+   Desktop Manager — desktop.css
+   ============================================================ */
+
+/* ── Icons layer — sits above wallpaper, below windows ── */
+.dt-icons-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: all;
+  overflow: hidden;
+}
+
+/* ── Individual icon ── */
+.dt-icon {
+  position: absolute;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: default;
+  transition: box-shadow 120ms ease;
+  -webkit-user-drag: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.dt-icon:hover {
+  background: rgba(255,255,255,0.10);
+}
+
+.dt-icon.selected {
+  background: rgba(0,122,255,0.25);
+  box-shadow: 0 0 0 1.5px rgba(0,122,255,0.5);
+}
+
+.dt-icon.dragging {
+  opacity: 0.45;
+  z-index: 200;
+}
+
+/* Cut state — semi-transparent */
+.dt-icon.dt-cut {
+  opacity: 0.4;
+}
+
+.dt-icon-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  /* Spring pop on appear */
+  animation: dt-icon-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dt-icon-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.dt-icon-label {
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  line-height: 1.25;
+  max-width: 76px;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* macOS-style text shadow for readability on any wallpaper */
+  text-shadow:
+    0 1px 3px rgba(0,0,0,0.8),
+    0 0 8px rgba(0,0,0,0.5);
+}
+
+.dt-icon.selected .dt-icon-label {
+  background: #0a7aff;
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-shadow: none;
+  color: #fff;
+}
+
+/* ── Rename input ── */
+.dt-rename-input {
+  font-size: 11px;
+  text-align: center;
+  width: 72px;
+  background: #fff;
+  border: 1.5px solid #0a7aff;
+  border-radius: 4px;
+  padding: 1px 4px;
+  outline: none;
+  color: #1c1c1e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+/* ── Rubber band selection ── */
+.dt-rubber {
+  position: fixed;
+  border: 1.5px solid rgba(0,122,255,0.7);
+  background: rgba(0,122,255,0.12);
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 9000;
+  /* Smooth rubber stretch */
+  transition: none;
+}
+
+/* ── Drag ghost ── */
+.dt-drag-ghost {
+  position: absolute;
+  font-size: 32px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.85;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  animation: dt-ghost-appear 0.12s ease;
+}
+
+@keyframes dt-ghost-appear {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 0.85; }
+}
+
+.dt-ghost-badge {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: #0a84ff;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 5px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* ── Drop highlight on Finder window ── */
+.app-window.dt-drop-target {
+  box-shadow:
+    0 0 0 3px rgba(0,122,255,0.6),
+    0 8px 40px rgba(0,0,0,0.5) !important;
+}
+
+/* ── Desktop drop zone ── */
+.dt-icons-layer.dt-drop-active::after {
+  content: 'Drop to add to Desktop';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,122,255,0.08);
+  border: 2px dashed rgba(0,122,255,0.4);
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ── Context menus ── */
+.dt-context-menu {
+  position: fixed;
+  z-index: 99999;
+  background: rgba(245,244,242,0.92);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-radius: 10px;
+  padding: 5px;
+  min-width: 200px;
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.12),
+    0 8px 28px rgba(0,0,0,0.28);
+}
+
+.dt-ctx-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: #1c1c1e;
+  border-radius: 6px;
+  font-family: -apple-system, sans-serif;
+  transition: background 60ms ease;
+}
+.dt-ctx-item:hover     { background: #0a84ff; color: #fff; }
+.dt-ctx-item:disabled  { opacity: 0.35; cursor: default; pointer-events: none; }
+.dt-ctx-danger         { color: #ff3b30; }
+.dt-ctx-danger:hover   { background: rgba(255,59,48,0.12); color: #ff3b30; }
+.dt-ctx-sep            { height: 0.5px; background: rgba(0,0,0,0.12); margin: 3px 6px; }
+.dt-ctx-kbd {
+  font-size: 11px;
+  opacity: 0.5;
+  letter-spacing: 1px;
+}
+.dt-ctx-item:hover .dt-ctx-kbd { opacity: 0.75; }
+
+/* ── Clipboard feedback toast ── */
+.dt-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(30,30,32,0.88);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 20px;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 99999;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34,1.4,0.64,1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  font-family: -apple-system, sans-serif;
+}
+.dt-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Image lightbox ── */
+.dt-lightbox {
+  position: absolute;
+  inset: 0;
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dt-lb-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  animation: dt-lb-in 0.18s ease;
+}
+@keyframes dt-lb-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.dt-lb-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  max-width: 88%; max-height: 88%;
+  animation: dt-lb-zoom 0.2s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes dt-lb-zoom {
+  from { transform: scale(0.88); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.dt-lb-img {
+  max-width: 100%; max-height: 72vh;
+  object-fit: contain; border-radius: 12px;
+  box-shadow: 0 12px 60px rgba(0,0,0,0.55);
+}
+.dt-lb-name { color: rgba(255,255,255,0.75); font-size: 13px; font-family: -apple-system, sans-serif; }
+.dt-lb-close {
+  position: absolute; top: -14px; right: -14px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); border: none;
+  cursor: pointer; color: #fff; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 120ms;
+  font-family: -apple-system, sans-serif;
+}
+.dt-lb-close:hover { background: rgba(255,255,255,0.32); }
+
+/* ── Dark mode ── */
+#desktop.dark-mode .dt-icon-label {
+  text-shadow: 0 1px 4px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.7);
+}
+#desktop.dark-mode .dt-context-menu {
+  background: rgba(40,40,44,0.92);
+}
+#desktop.dark-mode .dt-ctx-item { color: #f5f5f7; }
+#desktop.dark-mode .dt-ctx-danger { color: #ff6b6b; }
