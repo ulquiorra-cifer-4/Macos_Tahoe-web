@@ -1,7 +1,9 @@
 # macOS Tahoe — Web Emulator
 
 A pixel-perfect, fully interactive recreation of macOS Tahoe built with **TypeScript**, **HTML**, and **CSS** — no frameworks, no dependencies at runtime. Every component is hand-crafted from scratch.
-
+---
+![macos startup screen](screenshot.png)
+---
 ---
 
 ## 📸 Preview
