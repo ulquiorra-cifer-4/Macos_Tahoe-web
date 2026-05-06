@@ -120,6 +120,9 @@ function buildDock() {
             if (icon.id === "finder" && typeof window.openFinderWindow === "function") {
                 window.openFinderWindow();
             }
+            if (icon.id === "photos" && typeof window.openPhotosWindow === "function") {
+                window.openPhotosWindow();
+            }
         });
         dock.appendChild(wrap);
         iconStates.push(state);
