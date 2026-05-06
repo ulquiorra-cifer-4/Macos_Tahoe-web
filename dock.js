@@ -166,12 +166,45 @@ function buildCalendar() {
             h += `<div class="cal-day other-month">${i}</div>`;
     el.innerHTML = h + "</div>";
 }
-// ── Wallpaper ──
+// ── Wallpaper — load saved choice first, fall back to wallpaper.jpg ──
 (function () {
     const wl = document.getElementById("wallpaperLayer");
+    function applyBlobUrl(blobUrl) {
+        wl.style.cssText = `
+      position:absolute;inset:0;
+      background-image:url(${blobUrl});
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      z-index:0;
+    `;
+    }
+    function applyGradient() {
+        wl.style.cssText = `
+      position:absolute;inset:0;
+      background:linear-gradient(155deg,#061224 0%,#0b2545 20%,#0e3d6e 40%,#1a5a8a 58%,#2c7bb0 72%,#4da0c8 84%,#89c8d8 93%,#d0ecd8 100%);
+      z-index:0;
+    `;
+    }
+    // Check if user saved a wallpaper blob/dataURL previously
+    const savedWallpaper = localStorage.getItem("macos_wallpaper_v1");
+    if (savedWallpaper) {
+        applyBlobUrl(savedWallpaper);
+        return;
+    }
+    // Try loading wallpaper.jpg from root
     const p = new Image();
-    p.onload = () => { wl.style.backgroundImage = "url(wallpaper.jpg)"; };
-    p.onerror = () => { wl.style.background = "linear-gradient(155deg,#061224 0%,#0b2545 20%,#0e3d6e 40%,#1a5a8a 58%,#2c7bb0 72%,#4da0c8 84%,#89c8d8 93%,#d0ecd8 100%)"; };
+    p.onload = () => {
+        // Convert to blob URL so it's consistent with user-set wallpapers
+        fetch("wallpaper.jpg")
+            .then(r => r.blob())
+            .then(blob => {
+            const url = URL.createObjectURL(blob);
+            applyBlobUrl(url);
+        })
+            .catch(() => applyBlobUrl("wallpaper.jpg"));
+    };
+    p.onerror = () => applyGradient();
     p.src = "wallpaper.jpg?" + Date.now();
 })();
 // ── Init ──
