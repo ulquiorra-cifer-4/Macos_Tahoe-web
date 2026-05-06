@@ -258,21 +258,38 @@ class PhotosApp {
         const wl = document.getElementById("wallpaperLayer");
         if (!wl)
             return;
-        // If it's a file path, load as image
-        if (!src.startsWith("data:")) {
-            const img = new Image();
-            img.onload = () => {
-                wl.style.backgroundImage = `url(${src})`;
-                wl.style.background = "";
-                this._wallpaperToast();
-            };
-            img.onerror = () => alert("Could not load photo as wallpaper. Make sure the file exists in photos/");
-            img.src = src;
-        }
-        else {
+        if (src.startsWith("data:")) {
+            // Already a data URL (imported image) — apply directly
             wl.style.backgroundImage = `url(${src})`;
+            wl.style.backgroundSize = "cover";
+            wl.style.backgroundPosition = "center";
             this._wallpaperToast();
+            return;
         }
+        // File path — fetch and convert to blob URL so CSS resolves correctly
+        // regardless of the page's base URL
+        fetch(src)
+            .then(res => {
+            if (!res.ok)
+                throw new Error(`HTTP ${res.status}`);
+            return res.blob();
+        })
+            .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            // Revoke previous blob if stored
+            const prev = window.__lastWallpaperBlob;
+            if (prev && prev.startsWith("blob:"))
+                URL.revokeObjectURL(prev);
+            window.__lastWallpaperBlob = blobUrl;
+            wl.style.backgroundImage = `url(${blobUrl})`;
+            wl.style.backgroundSize = "cover";
+            wl.style.backgroundPosition = "center";
+            wl.style.background = ""; // clear gradient fallback
+            this._wallpaperToast();
+        })
+            .catch(() => {
+            alert(`Could not load wallpaper.\nMake sure "${src}" exists in your project folder and the server is running.`);
+        });
     }
     _wallpaperToast() {
         document.getElementById("ph-wp-toast")?.remove();
