@@ -144,17 +144,28 @@ class PhotosGrid {
         // Aspect ratio box
         const ratio = photo.height / photo.width;
         cell.style.setProperty("--ratio", String(ratio));
-        // Image
+        // ── Lazy image — src set ONLY when cell enters viewport ──
         const img = document.createElement("img");
         img.className = "ph-img";
-        img.loading = "lazy";
-        img.src = photo.thumb;
+        img.decoding = "async"; // non-blocking decode
         img.alt = photo.location ?? "";
+        img.dataset.src = photo.thumb; // store real src in data attr
         img.onerror = () => {
-            // Show placeholder gradient when photo file not found
             cell.classList.add("ph-placeholder");
             img.style.display = "none";
         };
+        // IntersectionObserver — load only when visible
+        const obs = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting)
+                    return;
+                const dataSrc = img.dataset.src;
+                if (dataSrc)
+                    img.src = dataSrc;
+                observer.unobserve(img);
+            });
+        }, { rootMargin: "200px" }); // start loading 200px before entering view
+        obs.observe(img);
         // Hover overlay
         const overlay = document.createElement("div");
         overlay.className = "ph-overlay";
