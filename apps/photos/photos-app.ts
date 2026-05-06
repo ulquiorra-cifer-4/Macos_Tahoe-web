@@ -275,37 +275,52 @@ class PhotosApp {
     const wl = document.getElementById("wallpaperLayer");
     if (!wl) return;
 
-    if (src.startsWith("data:")) {
-      // Already a data URL (imported image) — apply directly
-      wl.style.backgroundImage = `url(${src})`;
-      wl.style.backgroundSize     = "cover";
-      wl.style.backgroundPosition = "center";
+    const apply = (url: string) => {
+      wl.style.cssText = `
+        position:absolute;inset:0;
+        background-image:url(${url});
+        background-size:cover;
+        background-position:center;
+        background-repeat:no-repeat;
+        z-index:0;
+      `;
+      // Persist so page reload keeps user's wallpaper
+      try {
+        // Only store data URLs (not blob: which are session-only)
+        if (url.startsWith("data:")) {
+          localStorage.setItem("macos_wallpaper_v1", url);
+        }
+      } catch {}
       this._wallpaperToast();
+    };
+
+    if (src.startsWith("data:")) {
+      apply(src);
       return;
     }
 
-    // File path — fetch and convert to blob URL so CSS resolves correctly
-    // regardless of the page's base URL
+    // Fetch file path → blob URL (works regardless of base URL quirks)
     fetch(src)
       .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error(`${res.status}`);
         return res.blob();
       })
       .then(blob => {
-        const blobUrl = URL.createObjectURL(blob);
-        // Revoke previous blob if stored
-        const prev = (window as any).__lastWallpaperBlob;
-        if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
-        (window as any).__lastWallpaperBlob = blobUrl;
-
-        wl.style.backgroundImage    = `url(${blobUrl})`;
-        wl.style.backgroundSize     = "cover";
-        wl.style.backgroundPosition = "center";
-        wl.style.background         = ""; // clear gradient fallback
-        this._wallpaperToast();
+        // Convert blob to data URL so we can persist it
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          // Revoke any old blob
+          const old = (window as any).__lastWallpaperBlob;
+          if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
+          apply(dataUrl);
+          (window as any).__lastWallpaperBlob = dataUrl;
+        };
+        reader.readAsDataURL(blob);
       })
-      .catch(() => {
-        alert(`Could not load wallpaper.\nMake sure "${src}" exists in your project folder and the server is running.`);
+      .catch((err) => {
+        console.error("Wallpaper load failed:", err);
+        alert(`Could not load wallpaper from "${src}".\n\nMake sure:\n1. The file exists at that path\n2. You are running via a local server (not file://)`);
       });
   }
 
