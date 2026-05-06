@@ -22,6 +22,11 @@
     "apps/finder/finder-toolbar.ts",
     "apps/finder/finder-grid.ts",
     "apps/finder/finder-preview.ts",
-    "apps/finder/finder-app.ts"
+    "apps/finder/finder-app.ts",
+    "apps/photos/photos-store.ts",
+    "apps/photos/photos-grid.ts",
+    "apps/photos/photos-lightbox.ts",
+    "apps/photos/photos-sidebar.ts",
+    "apps/photos/photos-app.ts"
   ]
 }
