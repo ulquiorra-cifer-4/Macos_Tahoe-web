@@ -1,0 +1,279 @@
+/* ============================================================
+   Lock Screen — lockscreen.css
+   ============================================================ */
+
+/* ── Root overlay — sits above everything ── */
+.ls-root {
+  position: absolute;
+  inset: 0;
+  z-index: 99000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+
+  /* Initial state: hidden below viewport */
+  transform: translateY(100%);
+  opacity: 0;
+  transition: none;
+  will-change: transform, opacity;
+}
+
+/* Visible state (mounted) */
+.ls-root.ls-visible {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1),
+              opacity    0.4s ease;
+}
+
+/* Unlock — slides UP out of view */
+.ls-root.ls-unlocking {
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity    0.45s ease 0.1s !important;
+}
+
+/* ── Video background ── */
+.ls-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.ls-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Fallback wallpaper if video fails */
+.ls-video-fallback {
+  position: absolute;
+  inset: 0;
+  background-image: url('wallpaper.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* Subtle dark vignette so text is readable */
+.ls-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.18) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.25) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Top-right status bar ── */
+.ls-statusbar {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+.ls-sb-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255,255,255,0.88);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+}
+
+/* ── Clock ── */
+.ls-clock-wrap {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 60px;
+  /* Subtle parallax feel — slightly elevated */
+  filter: drop-shadow(0 2px 20px rgba(0,0,0,0.25));
+}
+
+.ls-date {
+  font-family: -apple-system, 'SF Pro Display', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.90);
+  text-shadow: 0 1px 12px rgba(0,0,0,0.3);
+}
+
+.ls-time {
+  font-family: -apple-system, 'SF Pro Display', sans-serif;
+  font-size: clamp(90px, 12vw, 140px);
+  font-weight: 200;           /* ultra-light — exactly like macOS Tahoe lock */
+  letter-spacing: -4px;
+  line-height: 1;
+  color: rgba(255,255,255,0.92);
+  /* Frosted glass text effect — matches screenshot */
+  text-shadow:
+    0 0  60px rgba(150,210,255,0.25),
+    0 2px 20px rgba(0,0,0,0.20);
+}
+
+/* ── User section ── */
+.ls-user-wrap {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 60px;
+  cursor: pointer;
+}
+
+/* Avatar ring */
+.ls-avatar-ring {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+  padding: 2px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.1),
+    0 4px 20px rgba(0,0,0,0.35);
+  transition: transform 0.2s cubic-bezier(0.34,1.4,0.64,1),
+              box-shadow 0.2s ease;
+}
+.ls-user-wrap:hover .ls-avatar-ring {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 0 6px 28px rgba(0,0,0,0.45);
+}
+
+.ls-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: linear-gradient(135deg, #a8e063, #56ab2f);
+}
+
+.ls-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a8e063, #56ab2f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+/* Username */
+.ls-username {
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+  letter-spacing: 0.2px;
+}
+
+/* Hint text */
+.ls-hint {
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.70);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: opacity 0.2s;
+}
+
+/* Password dots */
+.ls-dots {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.ls-user-wrap:hover .ls-dots {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ls-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.7);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.ls-dot.filled {
+  background: rgba(255,255,255,0.9);
+  border-color: rgba(255,255,255,0.9);
+}
+
+/* Enter / unlock button */
+.ls-enter-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.85) translateY(4px);
+  transition: opacity 0.22s ease,
+              transform 0.22s cubic-bezier(0.34,1.4,0.64,1),
+              background 0.15s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+/* Show button when user section hovered OR .visible class added */
+.ls-user-wrap:hover .ls-enter-btn,
+.ls-enter-btn.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.ls-enter-btn:hover {
+  background: rgba(255,255,255,0.35);
+  transform: scale(1.1) translateY(0) !important;
+}
+.ls-enter-btn:active {
+  transform: scale(0.96) translateY(0) !important;
+}
+
+/* ── Unlock flash effect ── */
+@keyframes ls-flash {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+.ls-root.ls-unlocking .ls-clock-wrap,
+.ls-root.ls-unlocking .ls-user-wrap {
+  animation: ls-flash 0.25s ease;
+}
