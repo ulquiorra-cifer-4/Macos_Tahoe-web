@@ -5,10 +5,14 @@
     "strict": true,
     "outDir": "/home/claude/macos-web",
     "rootDir": "/home/claude/macos-web",
-    "lib": ["ES2020", "DOM"],
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
     "ignoreDeprecations": "6.0"
   },
   "files": [
+    "lockscreen.ts",
     "dock.ts",
     "window-manager.ts",
     "menubar.ts",
