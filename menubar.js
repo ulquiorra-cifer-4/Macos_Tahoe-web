@@ -269,6 +269,17 @@ function buildDropdown(items) {
         sc.className = "menu-shortcut";
         sc.textContent = item.shortcut ?? "";
         btn.append(label, sc);
+        // Wire special actions
+        if (item.label === "Lock Screen") {
+            btn.addEventListener("click", () => {
+                closeAllMenus();
+                setTimeout(() => {
+                    if (typeof window.showLockScreen === "function") {
+                        window.showLockScreen();
+                    }
+                }, 120);
+            });
+        }
         section.appendChild(btn);
     });
     return section;
