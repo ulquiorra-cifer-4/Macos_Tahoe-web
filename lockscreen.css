@@ -111,23 +111,29 @@
 .ls-date {
   font-family: -apple-system, 'SF Pro Display', sans-serif;
   font-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-  color: rgba(255,255,255,0.90);
-  text-shadow: 0 1px 12px rgba(0,0,0,0.3);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.88);
+  text-shadow: 0 1px 12px rgba(0,0,0,0.25);
 }
 
 .ls-time {
   font-family: -apple-system, 'SF Pro Display', sans-serif;
-  font-size: clamp(90px, 12vw, 140px);
-  font-weight: 200;           /* ultra-light — exactly like macOS Tahoe lock */
-  letter-spacing: -4px;
-  line-height: 1;
-  color: rgba(255,255,255,0.92);
-  /* Frosted glass text effect — matches screenshot */
+  font-size: clamp(100px, 13vw, 148px);
+  font-weight: 700;              /* thick — matches real macOS Tahoe lock */
+  letter-spacing: -6px;
+  line-height: 0.95;
+  /* Frosted / translucent look — semi-transparent white with blur glow */
+  color: rgba(255,255,255,0.72);
+  -webkit-text-stroke: 0px transparent;
   text-shadow:
-    0 0  60px rgba(150,210,255,0.25),
-    0 2px 20px rgba(0,0,0,0.20);
+    0 0  80px rgba(180,225,255,0.30),
+    0 0  30px rgba(180,225,255,0.20),
+    0 4px 24px rgba(0,0,0,0.18);
+  /* Glass blur effect on the text itself */
+  backdrop-filter: blur(0px);
+  /* Crisp render */
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── User section ── */
