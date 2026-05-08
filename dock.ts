@@ -145,6 +145,9 @@ function buildDock(): void {
       if (icon.id === "photos" && typeof (window as any).openPhotosWindow === "function") {
         (window as any).openPhotosWindow();
       }
+      if (icon.id === "reminders" && typeof (window as any).openRemindersWindow === "function") {
+        (window as any).openRemindersWindow();
+      }
     });
 
     dock.appendChild(wrap);
