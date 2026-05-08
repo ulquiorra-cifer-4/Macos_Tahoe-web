@@ -123,6 +123,9 @@ function buildDock() {
             if (icon.id === "photos" && typeof window.openPhotosWindow === "function") {
                 window.openPhotosWindow();
             }
+            if (icon.id === "reminders" && typeof window.openRemindersWindow === "function") {
+                window.openRemindersWindow();
+            }
         });
         dock.appendChild(wrap);
         iconStates.push(state);
