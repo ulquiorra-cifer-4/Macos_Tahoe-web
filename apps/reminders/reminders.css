@@ -1,0 +1,437 @@
+/* ============================================================
+   Reminders App — reminders.css
+   Two-column macOS Reminders layout
+   ============================================================ */
+
+/* ── Window shell ── */
+.reminders-app {
+  width: 100%; height: 100%;
+  display: flex;
+  background: #faf9f6;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  color: #1c1c1e;
+  user-select: none;
+}
+
+/* ═════════════════════════════════════════════
+   SIDEBAR
+   ═════════════════════════════════════════════ */
+.rm-sidebar {
+  width: 220px; min-width: 220px;
+  background: #f0eeea;
+  border-right: 0.5px solid rgba(0,0,0,0.08);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Sidebar header */
+.rm-sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px 6px;
+  flex-shrink: 0;
+}
+.rm-sidebar-title {
+  font-size: 11px; font-weight: 600;
+  color: rgba(0,0,0,0.4); letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.rm-sidebar-add {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.4);
+  transition: background 100ms;
+}
+.rm-sidebar-add:hover { background: rgba(0,0,0,0.08); color: #000; }
+
+/* List group */
+.rm-list-group-label {
+  font-size: 10.5px; font-weight: 600;
+  color: rgba(0,0,0,0.35);
+  padding: 10px 14px 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.rm-list-sep { height: 0.5px; background: rgba(0,0,0,0.08); margin: 4px 12px; }
+
+/* List item */
+.rm-list-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  background: none; border: none; cursor: pointer;
+  border-radius: 8px; margin: 1px 6px;
+  text-align: left; width: calc(100% - 12px);
+  transition: background 100ms;
+  font-size: 13px; color: #1c1c1e;
+}
+.rm-list-item:hover  { background: rgba(0,0,0,0.06); }
+.rm-list-item.active { background: rgba(0,122,255,0.12); }
+
+.rm-list-item .rm-list-icon {
+  width: 14px; height: 14px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.rm-list-item .rm-list-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rm-list-item .rm-list-count {
+  font-size: 11px; color: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.07); border-radius: 10px;
+  padding: 1px 7px; flex-shrink: 0;
+}
+
+/* Add list button at bottom */
+.rm-add-list-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  margin: 6px;
+  background: rgba(0,0,0,0.04);
+  border: 0.5px dashed rgba(0,0,0,0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: rgba(0,0,0,0.5);
+  transition: all 120ms;
+  text-align: left;
+}
+.rm-add-list-btn:hover {
+  background: rgba(0,0,0,0.07);
+  border-color: rgba(0,0,0,0.25);
+  color: rgba(0,0,0,0.7);
+}
+
+/* ═════════════════════════════════════════════
+   MAIN AREA
+   ═════════════════════════════════════════════ */
+.rm-main {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden;
+  background: #faf9f6;
+}
+
+/* Top toolbar */
+.rm-topbar {
+  height: 44px; min-height: 44px;
+  background: rgba(248,246,242,0.95);
+  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  display: flex; align-items: center;
+  padding: 0 12px 0 80px;
+  gap: 8px;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+.rm-topbar-center { flex: 1; font-weight: 600; font-size: 14px; color: #1c1c1e; }
+.rm-topbar-actions { display: flex; gap: 6px; align-items: center; }
+.rm-topbar-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(0,0,0,0.55);
+  transition: background 120ms;
+}
+.rm-topbar-btn:hover { background: rgba(0,0,0,0.08); color: #000; }
+
+/* Add New Reminder Button */
+.rm-add-btn {
+  padding: 5px 14px;
+  background: #007aff;
+  border: none; border-radius: 6px;
+  color: white; font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: opacity 120ms, transform 80ms;
+}
+.rm-add-btn:hover { opacity: 0.9; }
+.rm-add-btn:active { transform: scale(0.97); }
+
+/* Search */
+.rm-search-wrap {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(0,0,0,0.07); border-radius: 7px;
+  padding: 3px 8px;
+}
+.rm-search-input {
+  width: 120px; background: none; border: none; outline: none;
+  font-size: 12px; color: #1c1c1e;
+}
+.rm-search-input::placeholder { color: rgba(0,0,0,0.3); }
+
+/* ═══ Reminder List ═══ */
+.rm-list-body {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.rm-list-scroll { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+/* Empty state */
+.rm-empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; gap: 12px;
+  color: rgba(0,0,0,0.25); pointer-events: none;
+}
+.rm-empty-icon { font-size: 52px; opacity: 0.4; }
+
+/* Reminder item */
+.rm-reminder-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  margin: 0 12px;
+  border-radius: 10px;
+  transition: background 100ms;
+  cursor: pointer;
+}
+.rm-reminder-item:hover { background: rgba(0,0,0,0.04); }
+
+/* Custom checkbox */
+.rm-checkbox {
+  width: 20px; height: 20px; min-width: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 150ms ease;
+  margin-top: 1px;
+}
+.rm-checkbox:hover { border-color: #34c759; }
+.rm-checkbox.checked {
+  background: #34c759; border-color: #34c759;
+}
+.rm-checkbox.checked svg { display: block; }
+.rm-checkbox svg { display: none; }
+.rm-checkbox svg path { stroke: white; stroke-width: 2.5; fill: none; }
+
+/* Reminder content */
+.rm-reminder-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.rm-reminder-header {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.rm-reminder-title {
+  font-size: 13.5px; font-weight: 500; color: #1c1c1e;
+  line-height: 1.3;
+}
+.rm-reminder-title.completed {
+  text-decoration: line-through; color: rgba(0,0,0,0.35);
+}
+.rm-reminder-notes {
+  font-size: 12px; color: rgba(0,0,0,0.45);
+  line-height: 1.35;
+}
+.rm-reminder-meta {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Priority dot */
+.rm-priority {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.rm-priority-high    { background: #ff3b30; }
+.rm-priority-medium  { background: #ff9500; }
+.rm-priority-low     { background: #8e8e93; }
+
+/* Flag icon */
+.rm-flag {
+  width: 14px; height: 14px;
+  color: transparent;
+  transition: color 120ms;
+}
+.rm-flag.flagged { color: #ff9500; }
+.rm-flag:hover { color: #ff9500; }
+
+/* Due date chip */
+.rm-due-date {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.rm-due-today    { background: rgba(255,59,48,0.08); color: #ff3b30; }
+.rm-due-soon     { background: rgba(255,149,0,0.1);  color: #ff9500; }
+.rm-due-future   { background: rgba(0,0,0,0.05);      color: rgba(0,0,0,0.45); }
+.rm-due-overdue  { background: rgba(255,59,48,0.08); color: #ff3b30; }
+
+/* Tags */
+.rm-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.rm-tag {
+  font-size: 10px; color: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.06);
+  padding: 1px 6px; border-radius: 8px;
+}
+
+/* List label on reminder */
+.rm-list-label {
+  font-size: 10.5px; color: rgba(0,0,0,0.35);
+  display: flex; align-items: center; gap: 3px;
+}
+.rm-list-label .rm-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* ═══ Add Reminder Inline Form ═══ */
+.rm-add-form {
+  padding: 10px 14px;
+  margin: 0 12px 8px;
+  background: #fff;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  display: flex; flex-direction: column; gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.rm-add-form input.rm-input,
+.rm-add-form textarea.rm-input {
+  background: rgba(0,0,0,0.03);
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #1c1c1e;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+}
+.rm-add-form input.rm-input:focus,
+.rm-add-form textarea.rm-input:focus {
+  border-color: #007aff;
+  background: #fff;
+}
+.rm-add-form .rm-input-row {
+  display: flex; gap: 6px; align-items: center;
+}
+.rm-add-form .rm-priority-select {
+  display: flex; gap: 4px;
+}
+.rm-priority-btn {
+  width: 22px; height: 22px;
+  border-radius: 50%; border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 120ms, box-shadow 120ms;
+  position: relative;
+}
+.rm-priority-btn:hover { transform: scale(1.15); }
+.rm-priority-btn.selected { box-shadow: 0 0 0 2px rgba(0,0,0,0.1); }
+.rm-prio-high   { background: #ff3b30; }
+.rm-prio-medium { background: #ff9500; }
+.rm-prio-low    { background: #8e8e93; }
+
+.rm-add-form .rm-date-row {
+  display: flex; gap: 6px; align-items: center;
+}
+.rm-add-form .rm-date-row input[type="date"],
+.rm-add-form .rm-date-row input[type="time"] {
+  font-size: 12px; padding: 3px 6px;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 5px;
+  font-family: inherit;
+  color: #1c1c1e;
+  background: rgba(0,0,0,0.02);
+}
+.rm-add-form .rm-form-actions {
+  display: flex; gap: 8px; align-items: center;
+  padding-top: 4px;
+}
+.rm-form-submit {
+  padding: 5px 14px;
+  background: #007aff; border: none; border-radius: 6px;
+  color: white; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: opacity 120ms;
+}
+.rm-form-submit:hover { opacity: 0.9; }
+.rm-form-cancel {
+  padding: 5px 12px;
+  background: none; border: none; border-radius: 6px;
+  color: rgba(0,0,0,0.5); font-size: 12px; cursor: pointer;
+  transition: background 120ms;
+}
+.rm-form-cancel:hover { background: rgba(0,0,0,0.06); }
+
+/* Quick add input at top */
+.rm-quick-add {
+  margin: 8px 12px 4px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  font-size: 13px; color: rgba(0,0,0,0.4);
+  cursor: text;
+  transition: background 100ms, border-color 100ms;
+}
+.rm-quick-add:hover { border-color: rgba(0,0,0,0.15); }
+
+/* ═══ Edit Form (inline on item) ═══ */
+.rm-edit-form {
+  padding: 8px 12px;
+  background: #fffef9;
+  border: 0.5px solid rgba(0,122,255,0.2);
+  border-radius: 10px;
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 0 12px;
+}
+
+/* Section headers */
+.rm-section-header {
+  font-size: 10px; font-weight: 600; color: rgba(0,0,0,0.35);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 8px 14px 4px;
+}
+
+/* ═══ Context Menu ═══ */
+.rm-context-menu {
+  position: fixed; z-index: 99999;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-radius: 10px;
+  padding: 5px;
+  min-width: 160px;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15), 0 6px 24px rgba(0,0,0,0.25);
+}
+.rm-ctx-btn {
+  display: block; width: 100%;
+  padding: 6px 12px; background: none; border: none;
+  cursor: pointer; text-align: left; font-size: 13px;
+  color: #1c1c1e; border-radius: 6px;
+  transition: background 80ms;
+}
+.rm-ctx-btn:hover { background: rgba(0,0,0,0.07); }
+.rm-ctx-danger      { color: #ff3b30; }
+.rm-ctx-danger:hover { background: rgba(255,59,48,0.1); }
+.rm-ctx-sep         { height: 0.5px; background: rgba(0,0,0,0.1); margin: 4px 6px; }
+
+/* ═══ Scrollbars ═══ */
+.rm-sidebar::-webkit-scrollbar,
+.rm-list-scroll::-webkit-scrollbar { width: 6px; }
+.rm-sidebar::-webkit-scrollbar-track,
+.rm-list-scroll::-webkit-scrollbar-track { background: transparent; }
+.rm-sidebar::-webkit-scrollbar-thumb,
+.rm-list-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+/* ═══ Dark mode ═══ */
+#desktop.dark-mode .reminders-app       { background: #1c1c1e; color: #f5f5f7; }
+#desktop.dark-mode .rm-sidebar          { background: #252526; border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .rm-list-item        { color: #f5f5f7; }
+#desktop.dark-mode .rm-list-item:hover  { background: rgba(255,255,255,0.06); }
+#desktop.dark-mode .rm-list-item.active { background: rgba(0,122,255,0.2); }
+#desktop.dark-mode .rm-main             { background: #1c1c1e; }
+#desktop.dark-mode .rm-topbar           { background: rgba(28,28,30,0.95); border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .rm-topbar-center    { color: #f5f5f7; }
+#desktop.dark-mode .rm-reminder-title   { color: #f5f5f7; }
+#desktop.dark-mode .rm-reminder-title.completed { color: rgba(255,255,255,0.35); }
+#desktop.dark-mode .rm-reminder-notes    { color: rgba(255,255,255,0.45); }
+#desktop.dark-mode .rm-add-form         { background: #2c2c2e; border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .rm-edit-form        { background: #2c2c2e; }
+#desktop.dark-mode .rm-quick-add         { background: #2c2c2e; border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+#desktop.dark-mode .rm-search-wrap      { background: rgba(255,255,255,0.07); }
+#desktop.dark-mode .rm-search-input      { color: #f5f5f7; }
+#desktop.dark-mode .rm-search-input::placeholder { color: rgba(255,255,255,0.3); }
+#desktop.dark-mode .rm-context-menu     { background: rgba(44,44,46,0.95); }
+#desktop.dark-mode .rm-ctx-btn          { color: #f5f5f7; }
+#desktop.dark-mode .rm-due-future       { color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); }
+#desktop.dark-mode .rm-checkbox         { border-color: rgba(255,255,255,0.25); }
+#desktop.dark-mode .rm-add-list-btn     { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+#desktop.dark-mode .rm-add-list-btn:hover { background: rgba(255,255,255,0.07); }
+#desktop.dark-mode input.rm-input,
+#desktop.dark-mode textarea.rm-input    { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #f5f5f7; }
+#desktop.dark-mode input.rm-input:focus,
+#desktop.dark-mode textarea.rm-input:focus { background: #2c2c2e; border-color: #007aff; }
+#desktop.dark-mode .rm-form-cancel       { color: rgba(255,255,255,0.5); }
