@@ -1,308 +1,191 @@
 "use strict";
 // ============================================================
-//  Reminders App — reminders-store.js
-//  Data layer: lists, reminders, localStorage persistence
+//  Reminders — reminders-store.ts
+//  Data layer: tasks, lists, smart lists, persistence
 // ============================================================
-const STORAGE_KEY = "macos_reminders_v1";
-// ── Seed Data ──
-const now = Date.now();
-const todayStr = () => new Date().toISOString().slice(0, 10);
-const tmrwStr = () => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-};
-const lastWeekStr = () => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return d.toISOString().slice(0, 10);
-};
-const nextWeekStr = () => {
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    return d.toISOString().slice(0, 10);
-};
-const SEED_LISTS = [
-    { id: "today", name: "Today", color: "#007aff", smartType: "today" },
-    { id: "scheduled", name: "Scheduled", color: "#ff9500", smartType: "scheduled" },
-    { id: "flagged", name: "Flagged", color: "#ff3b30", smartType: "flagged" },
-    { id: "completed", name: "Completed", color: "#8e8e93", smartType: "completed" },
-    { id: "all", name: "All", color: "#5856d6", smartType: "all" },
-    { id: "personal", name: "Personal", color: "#34c759" },
-    { id: "work", name: "Work", color: "#007aff" },
-    { id: "shopping", name: "Shopping", color: "#ff9500" },
+const STORE_KEY = "macos_reminders_v1";
+// ── Seed data ──
+const DEFAULT_LISTS = [
+    { id: "reminders", name: "Reminders", color: "#0a84ff", icon: "list.bullet", smart: false },
+    { id: "family", name: "Family", color: "#ff453a", icon: "house", smart: false },
+    { id: "work", name: "Work", color: "#ff9f0a", icon: "briefcase", smart: false },
+    { id: "groceries", name: "Groceries", color: "#30d158", icon: "cart", smart: false },
+    { id: "camping", name: "Camping Trip", color: "#ffd60a", icon: "tent", smart: false },
+    { id: "bookclub", name: "Book club", color: "#bf5af2", icon: "book", smart: false },
+    { id: "garden", name: "Gardening", color: "#30d158", icon: "leaf", smart: false },
 ];
+const REM_NOW = Date.now();
+const REM_TODAY = new Date().toISOString().split("T")[0];
+const REM_TOMORROW = new Date(now + 86400000).toISOString().split("T")[0];
 const SEED_REMINDERS = [
-    {
-        id: "r1", listId: "work", title: "Submit project proposal",
-        notes: "Include budget breakdown and timeline", dueDate: todayStr(), dueTime: "10:00",
-        priority: "high", tags: ["urgent"], flagged: true, completed: false, completedAt: null,
-        createdAt: now - 864e5, updatedAt: now - 3600e3,
-    },
-    {
-        id: "r2", listId: "personal", title: "Buy mom's birthday gift",
-        notes: "She likes artisanal chocolate or flowers", dueDate: nextWeekStr(), dueTime: null,
-        priority: "medium", tags: ["family"], flagged: false, completed: false, completedAt: null,
-        createdAt: now - 864e5 * 2, updatedAt: now - 864e5,
-    },
-    {
-        id: "r3", listId: "shopping", title: "Groceries — milk, eggs, bread",
-        notes: "Don't forget to check expiry dates", dueDate: tmrwStr(), dueTime: "17:00",
-        priority: "low", tags: ["weekly"], flagged: false, completed: false, completedAt: null,
-        createdAt: now - 864e5, updatedAt: now,
-    },
-    {
-        id: "r4", listId: "work", title: "Weekly team standup",
-        notes: "Review Q3 goals and blockers", dueDate: todayStr(), dueTime: "09:00",
-        priority: "medium", tags: ["meeting"], flagged: false, completed: true, completedAt: now - 3600e3,
-        createdAt: now - 864e5 * 2, updatedAt: now - 3600e3,
-    },
-    {
-        id: "r5", listId: "personal", title: "Book dentist appointment",
-        notes: "Dr. Smith on Oak Street", dueDate: tmrwStr(), dueTime: "14:00",
-        priority: "medium", tags: ["health"], flagged: false, completed: false, completedAt: null,
-        createdAt: now - 864e5 * 3, updatedAt: now - 864e5 * 2,
-    },
-    {
-        id: "r6", listId: "work", title: "Review pull requests",
-        notes: "Check the frontend refactor branch", dueDate: todayStr(), dueTime: null,
-        priority: "high", tags: ["urgent"], flagged: true, completed: false, completedAt: null,
-        createdAt: now - 864e5, updatedAt: now,
-    },
-    {
-        id: "r7", listId: "shopping", title: "Get a new phone charger",
-        notes: "USB-C, at least 20W", dueDate: tmrwStr(), dueTime: null,
-        priority: "low", tags: [] , flagged: false, completed: true, completedAt: now - 864e5,
-        createdAt: now - 864e5 * 4, updatedAt: now - 864e5,
-    },
-    {
-        id: "r8", listId: "personal", title: "Car service due",
-        notes: "Oil change + tire rotation", dueDate: nextWeekStr(), dueTime: null,
-        priority: "medium", tags: ["car"], flagged: false, completed: false, completedAt: null,
-        createdAt: now - 864e5 * 5, updatedAt: now - 864e5 * 3,
-    },
-    {
-        id: "r9", listId: "work", title: "Update documentation",
-        notes: "API docs for the new endpoints", dueDate: lastWeekStr(), dueTime: null,
-        priority: "low", tags: ["docs"], flagged: false, completed: true, completedAt: now - 864e5 * 2,
-        createdAt: now - 864e5 * 6, updatedAt: now - 864e5 * 2,
-    },
-    {
-        id: "r10", listId: "personal", title: "Call the plumber",
-        notes: "Leaky faucet in the kitchen", dueDate: tmrwStr(), dueTime: "18:00",
-        priority: "high", tags: ["home"], flagged: true, completed: false, completedAt: null,
-        createdAt: now - 864e5, updatedAt: now,
-    },
+    // Reminders list
+    { id: "r1", listId: "reminders", title: "Laundry", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TOMORROW, dueTime: null, repeat: "weekly", tags: [], assignee: "Danny", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r2", listId: "reminders", title: "Bake macarons", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: "17:40", repeat: "never", tags: [], assignee: "Danny", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r3", listId: "reminders", title: "Clean the grill", notes: "", completed: false, flagged: false, priority: "none", dueDate: null, dueTime: null, repeat: "never", tags: [], assignee: "Danny", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r4", listId: "reminders", title: "Plan Italy trip", notes: "Need to confirm whether we should fly to Milan or Rome", completed: false, flagged: false, priority: "medium", dueDate: null, dueTime: null, repeat: "never", tags: [], assignee: "Danny", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    // Family
+    { id: "r5", listId: "family", title: "File taxes", notes: "", completed: false, flagged: false, priority: "high", dueDate: REM_TODAY, dueTime: null, repeat: "never", tags: [], assignee: "Ashley", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r6", listId: "family", title: "School fees", notes: "", completed: false, flagged: true, priority: "high", dueDate: REM_TODAY, dueTime: null, repeat: "never", tags: [], assignee: "Ashley", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r7", listId: "family", title: "Dishes", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: "20:00", repeat: "daily", tags: [], assignee: "Ashley", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r8", listId: "family", title: "Pick up birthday cake for Sparky", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: null, repeat: "never", tags: [], assignee: "Ashley", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    // Work
+    { id: "r9", listId: "work", title: "Vacuuming", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: null, repeat: "weekly", tags: [], assignee: "Olivia", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r10", listId: "work", title: "Water the plants", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: null, repeat: "weekly", tags: [], assignee: "Olivia", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r11", listId: "work", title: "Feed Sparky", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: "17:00", repeat: "daily", tags: [], assignee: "Olivia", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r12", listId: "work", title: "Make the bed", notes: "", completed: false, flagged: false, priority: "none", dueDate: REM_TOMORROW, dueTime: "08:00", repeat: "daily", tags: [], assignee: "Olivia", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    // Completed
+    { id: "r13", listId: "reminders", title: "Buy groceries", notes: "", completed: true, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: null, repeat: "never", tags: [], assignee: "Danny", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
+    { id: "r14", listId: "family", title: "Call dentist", notes: "", completed: true, flagged: false, priority: "none", dueDate: REM_TODAY, dueTime: null, repeat: "never", tags: [], assignee: "Ashley", subtasks: [], createdAt: REM_NOW, updatedAt: REM_NOW },
 ];
-// ── Helpers ──
-function load() {
+function loadStore() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
-    } catch { /* ignore */ }
-    // Seed
-    return {
-        lists: SEED_LISTS.filter(l => !l.smartType),
-        reminders: SEED_REMINDERS,
-    };
+        const raw = localStorage.getItem(STORE_KEY);
+        if (raw)
+            return JSON.parse(raw);
+    }
+    catch { }
+    return { lists: DEFAULT_LISTS, reminders: SEED_REMINDERS };
 }
-function save(data) {
+function saveStore(data) {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch { /* ignore */ }
+        localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    }
+    catch { }
 }
-// ── Store Class ──
 class RemindersStore {
     constructor() {
         this.listeners = [];
-        const loaded = load();
-        this.data = {
-            lists: loaded.lists || [],
-            reminders: loaded.reminders || [],
-        };
+        this.data = loadStore();
+        if (!this.data.lists?.length)
+            this.data.lists = DEFAULT_LISTS;
+        if (!this.data.reminders?.length)
+            this.data.reminders = SEED_REMINDERS;
     }
     subscribe(fn) {
         this.listeners.push(fn);
         return () => { this.listeners = this.listeners.filter(l => l !== fn); };
     }
-    notify() {
-        save(this.data);
-        this.listeners.forEach(fn => fn());
-    }
-    // ── Smart lists ──
-    getSmartCount(type) {
-        switch (type) {
-            case "today":
-                return this.data.reminders.filter(r => {
-                    if (r.completed) return false;
-                    const rd = new Date(r.dueDate + "T00:00:00");
-                    const t = new Date();
-                    return rd.getFullYear() === t.getFullYear() && rd.getMonth() === t.getMonth() && rd.getDate() === t.getDate();
-                }).length;
-            case "scheduled":
-                return this.data.reminders.filter(r => !r.completed && r.dueDate).length;
-            case "flagged":
-                return this.data.reminders.filter(r => !r.completed && r.flagged).length;
-            case "completed":
-                return this.data.reminders.filter(r => r.completed).length;
-            case "all":
-                return this.data.reminders.filter(r => !r.completed).length;
-            default:
-                return 0;
-        }
-    }
+    notify() { saveStore(this.data); this.listeners.forEach(fn => fn()); }
     // ── Lists ──
-    getLists() {
-        const smart = [
-            { id: "today", name: "Today", color: "#007aff", smartType: "today" },
-            { id: "scheduled", name: "Scheduled", color: "#ff9500", smartType: "scheduled" },
-            { id: "flagged", name: "Flagged", color: "#ff3b30", smartType: "flagged" },
-            { id: "completed", name: "Completed", color: "#8e8e93", smartType: "completed" },
-            { id: "all", name: "All", color: "#5856d6", smartType: "all" },
-        ];
-        return [...smart, ...this.data.lists.map(l => ({ ...l, smartType: null }))];
-    }
-    getCustomLists() {
-        return this.data.lists;
-    }
-    createList(name, color) {
-        const list = { id: "list_" + Date.now(), name: (name || "New List").trim(), color: color || "#007aff" };
+    getLists() { return this.data.lists; }
+    getList(id) { return this.data.lists.find(l => l.id === id); }
+    createList(name, color, icon) {
+        const list = { id: "list_" + Date.now(), name, color, icon };
         this.data.lists.push(list);
         this.notify();
         return list;
     }
-    renameList(id, name) {
+    updateList(id, changes) {
         const l = this.data.lists.find(l => l.id === id);
-        if (l) { l.name = name.trim(); this.notify(); }
+        if (l) {
+            Object.assign(l, changes);
+            this.notify();
+        }
     }
     deleteList(id) {
         this.data.reminders = this.data.reminders.filter(r => r.listId !== id);
         this.data.lists = this.data.lists.filter(l => l.id !== id);
         this.notify();
     }
-    getList(id) {
-        if (["today","scheduled","flagged","completed","all"].includes(id)) {
-            const found = this.getLists().find(l => l.id === id);
-            return found || null;
-        }
-        return this.data.lists.find(l => l.id === id) || null;
-    }
     // ── Reminders ──
-    getReminders(listId) {
-        let list;
-        if (listId === "today") {
-            const t = new Date();
-            list = this.data.reminders.filter(r => {
-                if (r.completed) return false;
-                const rd = new Date(r.dueDate + "T00:00:00");
-                return rd.getFullYear() === t.getFullYear() && rd.getMonth() === t.getMonth() && rd.getDate() === t.getDate();
-            });
-        } else if (listId === "scheduled") {
-            list = this.data.reminders.filter(r => !r.completed && r.dueDate);
-        } else if (listId === "flagged") {
-            list = this.data.reminders.filter(r => !r.completed && r.flagged);
-        } else if (listId === "completed") {
-            list = this.data.reminders.filter(r => r.completed);
-        } else if (listId === "all") {
-            list = this.data.reminders.filter(r => !r.completed);
-        } else {
-            list = this.data.reminders.filter(r => r.listId === listId && !r.completed);
-        }
-        // Sort: flagged first, then by priority (high > medium > low), then by due date, then created
-        const priorityOrder = { high: 0, medium: 1, low: 2 };
-        return list.sort((a, b) => {
-            if (a.flagged !== b.flagged) return a.flagged ? -1 : 1;
-            const pa = priorityOrder[a.priority] ?? 2;
-            const pb = priorityOrder[b.priority] ?? 2;
-            if (pa !== pb) return pa - pb;
-            if (a.dueDate && b.dueDate) {
-                const dd = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-                if (dd !== 0) return dd;
-            }
-            return a.createdAt - b.createdAt;
-        });
+    getAll() { return this.data.reminders; }
+    getByList(listId) {
+        return this.data.reminders.filter(r => r.listId === listId);
     }
-    getCompletedReminders(listId) {
-        if (listId === "completed" || listId === "all") {
-            return this.data.reminders.filter(r => r.completed);
-        }
-        if (listId === "today" || listId === "scheduled" || listId === "flagged") {
-            return [];
-        }
-        return this.data.reminders.filter(r => r.listId === listId && r.completed);
+    getToday() {
+        const t = new Date().toISOString().split("T")[0];
+        return this.data.reminders.filter(r => !r.completed && r.dueDate === t);
     }
-    createReminder(listId, data) {
-        const nowMs = Date.now();
-        const rem = {
-            id: "r_" + nowMs,
-            listId: listId === "all" || listId.startsWith("smart_") ? "personal" : listId,
-            title: data.title || "New Reminder",
-            notes: data.notes || "",
-            dueDate: data.dueDate || null,
-            dueTime: data.dueTime || null,
-            priority: data.priority || "medium",
-            tags: Array.isArray(data.tags) ? [...data.tags] : [],
-            flagged: data.flagged || false,
-            completed: false,
-            completedAt: null,
-            createdAt: nowMs,
-            updatedAt: nowMs,
-        };
-        this.data.reminders.unshift(rem);
-        this.notify();
-        return rem;
+    getScheduled() {
+        return this.data.reminders.filter(r => !r.completed && r.dueDate);
     }
-    updateReminder(id, changes) {
-        const r = this.data.reminders.find(x => x.id === id);
-        if (!r) return;
-        Object.assign(r, changes, { updatedAt: Date.now() });
-        this.notify();
+    getFlagged() {
+        return this.data.reminders.filter(r => !r.completed && r.flagged);
     }
-    deleteReminder(id) {
-        this.data.reminders = this.data.reminders.filter(r => r.id !== id);
-        this.notify();
+    getCompleted() {
+        return this.data.reminders.filter(r => r.completed);
     }
-    toggleComplete(id) {
-        const r = this.data.reminders.find(x => x.id === id);
-        if (!r) return;
-        r.completed = !r.completed;
-        r.completedAt = r.completed ? Date.now() : null;
-        r.updatedAt = Date.now();
-        this.notify();
+    getAll_active() {
+        return this.data.reminders.filter(r => !r.completed);
     }
-    toggleFlag(id) {
-        const r = this.data.reminders.find(x => x.id === id);
-        if (!r) return;
-        r.flagged = !r.flagged;
-        r.updatedAt = Date.now();
-        this.notify();
-    }
-    moveToList(id, newListId) {
-        const r = this.data.reminders.find(x => x.id === id);
-        if (!r) return;
-        r.listId = newListId;
-        r.updatedAt = Date.now();
-        this.notify();
-    }
-    searchReminders(query) {
-        const q = query.toLowerCase().trim();
-        return this.data.reminders.filter(r =>
-            r.title.toLowerCase().includes(q) ||
-            (r.notes || "").toLowerCase().includes(q) ||
-            (r.tags || []).some(t => t.toLowerCase().includes(q))
-        );
+    search(q) {
+        const lq = q.toLowerCase();
+        return this.data.reminders.filter(r => r.title.toLowerCase().includes(lq) || r.notes.toLowerCase().includes(lq));
     }
     getReminder(id) {
         return this.data.reminders.find(r => r.id === id);
     }
-    getCountForList(listId) {
-        if (listId === "today") return this.getSmartCount("today");
-        if (listId === "scheduled") return this.getSmartCount("scheduled");
-        if (listId === "flagged") return this.getSmartCount("flagged");
-        if (listId === "completed") return this.getSmartCount("completed");
-        if (listId === "all") return this.getSmartCount("all");
-        return this.data.reminders.filter(r => r.listId === listId && !r.completed).length;
+    create(listId, title = "") {
+        const r = {
+            id: "rem_" + Date.now() + "_" + Math.random().toString(36).slice(2),
+            listId, title, notes: "", completed: false, flagged: false,
+            priority: "none", dueDate: null, dueTime: null, repeat: "never",
+            tags: [], subtasks: [], createdAt: Date.now(), updatedAt: Date.now(),
+        };
+        this.data.reminders.unshift(r);
+        this.notify();
+        return r;
+    }
+    update(id, changes) {
+        const r = this.data.reminders.find(r => r.id === id);
+        if (r) {
+            Object.assign(r, changes, { updatedAt: Date.now() });
+            this.notify();
+        }
+    }
+    toggleComplete(id) {
+        const r = this.data.reminders.find(r => r.id === id);
+        if (r) {
+            r.completed = !r.completed;
+            r.updatedAt = Date.now();
+            this.notify();
+        }
+    }
+    toggleFlag(id) {
+        const r = this.data.reminders.find(r => r.id === id);
+        if (r) {
+            r.flagged = !r.flagged;
+            r.updatedAt = Date.now();
+            this.notify();
+        }
+    }
+    delete(id) {
+        this.data.reminders = this.data.reminders.filter(r => r.id !== id);
+        this.notify();
+    }
+    getListCount(listId) {
+        return this.data.reminders.filter(r => !r.completed && r.listId === listId).length;
+    }
+    countToday() { return this.getToday().length; }
+    countScheduled() { return this.getScheduled().length; }
+    countFlagged() { return this.getFlagged().length; }
+    countCompleted() { return this.getCompleted().length; }
+    countAll() { return this.getAll_active().length; }
+    // ── Format helpers ──
+    formatDue(r) {
+        if (!r.dueDate)
+            return "";
+        const today = new Date().toISOString().split("T")[0];
+        const tom = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+        let ds = r.dueDate === today ? "Today" : r.dueDate === tom ? "Tomorrow" : r.dueDate;
+        if (r.dueTime) {
+            const [h, m] = r.dueTime.split(":").map(Number);
+            const ampm = h >= 12 ? "PM" : "AM";
+            ds += `, ${(h % 12) || 12}:${String(m).padStart(2, "0")} ${ampm}`;
+        }
+        if (r.repeat && r.repeat !== "never") {
+            const map = {
+                daily: "Daily", weekly: "Weekly", monthly: "Monthly", yearly: "Yearly"
+            };
+            ds += `, ${map[r.repeat] ?? r.repeat}`;
+        }
+        return ds;
+    }
+    isOverdue(r) {
+        if (!r.dueDate || r.completed)
+            return false;
+        return r.dueDate < new Date().toISOString().split("T")[0];
     }
 }
-// Singleton
 window.__remindersStore = window.__remindersStore || new RemindersStore();
+ 
