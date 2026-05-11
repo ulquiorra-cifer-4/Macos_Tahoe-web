@@ -31,6 +31,11 @@
     "apps/photos/photos-grid.ts",
     "apps/photos/photos-lightbox.ts",
     "apps/photos/photos-sidebar.ts",
-    "apps/photos/photos-app.ts"
+    "apps/photos/photos-app.ts",
+    "apps/reminders/reminders-store.ts",
+    "apps/reminders/reminders-sidebar.ts",
+    "apps/reminders/reminders-item.ts",
+    "apps/reminders/reminders-detail.ts",
+    "apps/reminders/reminders-app.ts"
   ]
-}
+} 
