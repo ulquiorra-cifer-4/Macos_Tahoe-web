@@ -36,6 +36,7 @@
     "apps/reminders/reminders-sidebar.ts",
     "apps/reminders/reminders-item.ts",
     "apps/reminders/reminders-detail.ts",
-    "apps/reminders/reminders-app.ts"
+    "apps/reminders/reminders-app.ts",
+    "icon-pack-manager.ts"
   ]
-} 
+}
