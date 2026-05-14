@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="apps/finder/finder.css" />
   <link rel="stylesheet" href="apps/photos/photos.css" />
   <link rel="stylesheet" href="apps/reminders/reminders.css" />
+  <link rel="stylesheet" href="icon-pack-manager.css" />
 </head>
 <body>
   <div id="desktop">
@@ -63,6 +64,9 @@
   <script src="apps/reminders/reminders-detail.js"></script>
   <script src="apps/reminders/reminders-app.js"></script>
 
+  <!-- Icon pack manager — must load before dock so it can intercept icon loads -->
+  <script src="icon-pack-manager.js"></script>
+
   <!-- Desktop manager — needs FS loaded first -->
   <script src="desktop-manager.js"></script>
 
@@ -80,4 +84,3 @@
   </script>
 </body>
 </html>
- 
