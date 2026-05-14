@@ -1,0 +1,173 @@
+/* ============================================================
+   Icon Pack Manager Panel — icon-pack-manager.css
+   ============================================================ */
+
+.ipm-panel {
+  position: absolute;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px) scale(0.96);
+  width: 360px;
+  background: rgba(28,28,32,0.88);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.14),
+    0 24px 60px rgba(0,0,0,0.65);
+  z-index: 8000;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease,
+              transform 0.25s cubic-bezier(0.34,1.4,0.64,1);
+  color: #f5f5f7;
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  user-select: none;
+}
+
+.ipm-panel.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Header */
+.ipm-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.ipm-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 15px; font-weight: 700; color: #fff;
+}
+.ipm-close {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: none;
+  cursor: pointer; color: rgba(255,255,255,0.6); font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 120ms;
+}
+.ipm-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* Repo section */
+.ipm-repo-section {
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 12px;
+  margin-bottom: 14px; display: flex; flex-direction: column; gap: 7px;
+}
+.ipm-repo-label {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.45); letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.ipm-repo-row { display: flex; gap: 7px; }
+.ipm-repo-input {
+  flex: 1; background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 7px 10px;
+  font-size: 12px; color: #fff; outline: none;
+  transition: border-color 150ms;
+  font-family: inherit;
+}
+.ipm-repo-input:focus { border-color: rgba(255,255,255,0.35); }
+.ipm-repo-input::placeholder { color: rgba(255,255,255,0.25); }
+.ipm-repo-btn {
+  background: #0a84ff; border: none; border-radius: 8px;
+  padding: 7px 14px; font-size: 12px; font-weight: 600;
+  color: #fff; cursor: pointer; white-space: nowrap;
+  transition: background 120ms, transform 80ms;
+}
+.ipm-repo-btn:hover   { background: #1a94ff; }
+.ipm-repo-btn:active  { transform: scale(0.96); }
+.ipm-repo-btn:disabled { opacity: 0.5; cursor: default; }
+.ipm-repo-hint {
+  font-size: 10.5px; color: rgba(255,255,255,0.28); line-height: 1.4;
+}
+
+/* Packs label */
+.ipm-packs-label {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.4); letter-spacing: 0.4px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+
+/* Pack grid */
+.ipm-packs-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-bottom: 12px;
+  max-height: 220px; overflow-y: auto;
+}
+.ipm-packs-grid::-webkit-scrollbar { width: 4px; }
+.ipm-packs-grid::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15); border-radius: 2px;
+}
+
+.ipm-pack-card {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 0; border-radius: 10px;
+  transition: transform 120ms ease;
+}
+.ipm-pack-card:hover { transform: scale(1.06); }
+
+.ipm-pack-preview {
+  width: 64px; height: 64px; border-radius: 14px;
+  border: 2px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.ipm-pack-card.active .ipm-pack-preview {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.3);
+}
+
+.ipm-pack-swatch {
+  width: 36px; height: 36px; border-radius: 9px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.ipm-pack-thumb {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Active checkmark */
+.ipm-pack-check {
+  position: absolute; top: 4px; right: 4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #30d158; font-size: 9px; font-weight: 700;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.ipm-pack-name {
+  font-size: 10.5px; font-weight: 500;
+  color: rgba(255,255,255,0.75); text-align: center;
+  line-height: 1.2; max-width: 64px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ipm-pack-author {
+  font-size: 9.5px; color: rgba(255,255,255,0.3); text-align: center;
+}
+
+/* Active row */
+.ipm-active-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+}
+.ipm-active-label {
+  font-size: 11.5px; color: rgba(255,255,255,0.4);
+}
+.ipm-active-name {
+  font-size: 11.5px; font-weight: 600; color: #fff; flex: 1;
+}
+.ipm-reset-btn {
+  font-size: 11px; color: rgba(255,255,255,0.4);
+  background: none; border: none; cursor: pointer;
+  padding: 3px 8px; border-radius: 6px;
+  transition: background 100ms, color 100ms;
+}
+.ipm-reset-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
