@@ -421,6 +421,9 @@ function buildActionCenter() {
 
       <!-- ROW 6: Bottom utility circles -->
       <div class="ac-row ac-row-utilities">
+        <button class="ac-util-circle" title="Icon Packs" id="acIconPacks">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+        </button>
         <button class="ac-util-circle" id="acDarkModeUtil" title="Dark Mode">
           <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 3a9 9 0 100 18A9 9 0 0012 3zm0 16a7 7 0 010-14v14z"/></svg>
         </button>
@@ -475,6 +478,15 @@ function buildActionCenter() {
     };
     document.getElementById("acDarkBtn")?.addEventListener("click", darkToggle);
     document.getElementById("acDarkModeUtil")?.addEventListener("click", darkToggle);
+    // Icon Packs button
+    document.getElementById("acIconPacks")?.addEventListener("click", () => {
+        toggleActionCenter();
+        setTimeout(() => {
+            if (typeof window.openIconPackPanel === "function") {
+                window.openIconPackPanel();
+            }
+        }, 200);
+    });
     // Brightness
     const briSlider = document.getElementById("acBrightness");
     briSlider?.addEventListener("input", () => {
