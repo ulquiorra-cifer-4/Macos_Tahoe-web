@@ -134,16 +134,6 @@ function buildDock() {
 dock.addEventListener("mouseenter", (e) => { mouseX = e.clientX; scheduleAll(); });
 dock.addEventListener("mousemove", (e) => { mouseX = e.clientX; scheduleAll(); });
 dock.addEventListener("mouseleave", () => resetAll());
-// Right-click on dock background → open icon pack panel
-dock.addEventListener("contextmenu", (e) => {
-    const target = e.target;
-    if (!target.closest(".dock-item") && !target.closest(".dock-separator")) {
-        e.preventDefault();
-        if (typeof window.openIconPackPanel === "function") {
-            window.openIconPackPanel();
-        }
-    }
-});
 dock.addEventListener("dragover", (e) => e.preventDefault());
 dock.addEventListener("drop", (e) => {
     e.preventDefault();
