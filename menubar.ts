@@ -134,6 +134,16 @@ const MENUS: Record<string, { title: string; items: MenuItem[] }> = {
       { label: 'macOS Help',                shortcut: '⌘?' },
     ],
   },
+  icons: {
+    title: 'Icons',
+    items: [
+      { label: 'Browse Icon Packs',         shortcut: '' },
+      { label: 'Reset to Default',          shortcut: '' },
+      { sep: true },
+      { label: 'Blue Pack',                 shortcut: '' },
+      { label: 'Dark Pack',                 shortcut: '' },
+    ],
+  },
 };
 
 interface MenuItem {
@@ -288,6 +298,49 @@ function buildDropdown(items: MenuItem[]): HTMLElement {
     sc.className = "menu-shortcut";
     sc.textContent = item.shortcut ?? "";
     btn.append(label, sc);
+
+    // Wire special actions
+    if (item.label === "Lock Screen") {
+      btn.addEventListener("click", () => {
+        closeAllMenus();
+        setTimeout(() => {
+          if (typeof (window as any).showLockScreen === "function") {
+            (window as any).showLockScreen();
+          }
+        }, 120);
+      });
+    }
+
+    // Icons menu actions — hardcoded repo, no URL input needed
+    if (item.label === "Browse Icon Packs") {
+      btn.addEventListener("click", () => {
+        closeAllMenus();
+        setTimeout(() => {
+          if (typeof (window as any).openIconPackPanel === "function") {
+            (window as any).openIconPackPanel();
+          }
+        }, 120);
+      });
+    }
+    if (item.label === "Reset to Default") {
+      btn.addEventListener("click", () => {
+        closeAllMenus();
+        (window as any).__iconPackManager?.applyPack("default");
+      });
+    }
+    if (item.label === "Blue Pack") {
+      btn.addEventListener("click", () => {
+        closeAllMenus();
+        (window as any).__iconPackManager?.applyPack("blue");
+      });
+    }
+    if (item.label === "Dark Pack") {
+      btn.addEventListener("click", () => {
+        closeAllMenus();
+        (window as any).__iconPackManager?.applyPack("dark");
+      });
+    }
+
     section.appendChild(btn);
   });
   return section;
@@ -435,6 +488,9 @@ function buildActionCenter(): void {
 
       <!-- ROW 6: Bottom utility circles -->
       <div class="ac-row ac-row-utilities">
+        <button class="ac-util-circle" title="Icon Packs" id="acIconPacks">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+        </button>
         <button class="ac-util-circle" id="acDarkModeUtil" title="Dark Mode">
           <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 3a9 9 0 100 18A9 9 0 0012 3zm0 16a7 7 0 010-14v14z"/></svg>
         </button>
@@ -496,6 +552,16 @@ function buildActionCenter(): void {
   };
   document.getElementById("acDarkBtn")?.addEventListener("click", darkToggle);
   document.getElementById("acDarkModeUtil")?.addEventListener("click", darkToggle);
+
+  // Icon Packs button
+  document.getElementById("acIconPacks")?.addEventListener("click", () => {
+    toggleActionCenter();
+    setTimeout(() => {
+      if (typeof (window as any).openIconPackPanel === "function") {
+        (window as any).openIconPackPanel();
+      }
+    }, 200);
+  });
 
   // Brightness
   const briSlider = document.getElementById("acBrightness") as HTMLInputElement;
