@@ -6,7 +6,8 @@
 // ============================================================
 const PACK_STORAGE_KEY = "macos_icon_pack_v1";
 const PACK_REPO_STORAGE = "macos_icon_pack_repo_v1";
-// Default icon names in the dock
+// ── Hardcoded icon pack repository ──
+const ICON_PACK_REPO_URL = "https://neelpatel112.github.io/Icons-pack-for-Macos-Tahoe-web";
 const DOCK_ICON_NAMES = [
     "finder", "launchpad", "settings", "safari", "messages",
     "calendar", "photos", "reminders", "notes", "music",
@@ -31,6 +32,10 @@ class IconPackManager {
         this.panelEl = null;
         this.listeners = [];
         this._loadSaved();
+        // Auto-load from hardcoded repo on startup
+        this.setRepoUrl(ICON_PACK_REPO_URL).catch(() => {
+            // Silently fail — builtins still work
+        });
     }
     // ── Load saved state ──
     _loadSaved() {
@@ -200,62 +205,25 @@ class IconPackManager {
         <button class="ipm-close" id="ipmClose">✕</button>
       </div>
 
-      <!-- Repo URL input -->
-      <div class="ipm-repo-section">
-        <label class="ipm-repo-label">Icon Pack Repository URL</label>
-        <div class="ipm-repo-row">
-          <input type="text" class="ipm-repo-input" id="ipmRepoUrl"
-            placeholder="https://your-github-pages.io/macos-icon-packs"
-            value="${this.repoUrl}" />
-          <button class="ipm-repo-btn" id="ipmLoadRepo">Load</button>
-        </div>
-        <div class="ipm-repo-hint">
-          Paste your GitHub Pages URL hosting the icon packs repo
-        </div>
+      <!-- Loading indicator -->
+      <div class="ipm-loading" id="ipmLoading" style="display:none">
+        <div class="ipm-spinner"></div>
+        <span>Loading packs…</span>
       </div>
 
       <!-- Pack grid -->
-      <div class="ipm-packs-label">Available Packs</div>
+      <div class="ipm-packs-label">Choose a Pack</div>
       <div class="ipm-packs-grid" id="ipmPacksGrid"></div>
 
       <!-- Active pack info -->
-      <div class="ipm-active-row" id="ipmActiveRow">
+      <div class="ipm-active-row">
         <span class="ipm-active-label">Active:</span>
         <span class="ipm-active-name" id="ipmActiveName">${this.activePack.name}</span>
-        <button class="ipm-reset-btn" id="ipmReset">Reset to Default</button>
+        <button class="ipm-reset-btn" id="ipmReset">Reset</button>
       </div>
     `;
         this._renderPackGrid();
-        // Events
         this.panelEl.querySelector("#ipmClose")?.addEventListener("click", () => this.closePanel());
-        this.panelEl.querySelector("#ipmLoadRepo")?.addEventListener("click", async () => {
-            const input = this.panelEl?.querySelector("#ipmRepoUrl");
-            const url = input?.value.trim();
-            if (!url)
-                return;
-            const btn = this.panelEl?.querySelector("#ipmLoadRepo");
-            if (btn) {
-                btn.textContent = "Loading…";
-                btn.disabled = true;
-            }
-            try {
-                await this.setRepoUrl(url);
-                if (btn) {
-                    btn.textContent = "✓ Loaded";
-                }
-                setTimeout(() => { if (btn) {
-                    btn.textContent = "Load";
-                    btn.disabled = false;
-                } }, 2000);
-            }
-            catch (err) {
-                if (btn) {
-                    btn.textContent = "Load";
-                    btn.disabled = false;
-                }
-                alert(err.message);
-            }
-        });
         this.panelEl.querySelector("#ipmReset")?.addEventListener("click", () => {
             this.applyPack("default");
             this._renderPackGrid();
