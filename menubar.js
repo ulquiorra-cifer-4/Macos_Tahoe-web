@@ -133,6 +133,16 @@ const MENUS = {
             { label: 'macOS Help', shortcut: '⌘?' },
         ],
     },
+    icons: {
+        title: 'Icons',
+        items: [
+            { label: 'Browse Icon Packs', shortcut: '' },
+            { label: 'Reset to Default', shortcut: '' },
+            { sep: true },
+            { label: 'Blue Pack', shortcut: '' },
+            { label: 'Dark Pack', shortcut: '' },
+        ],
+    },
 };
 // ─────────────────────────────────────────────
 //  Dark Mode — switches desktop class, dock icons, dock glass
@@ -278,6 +288,35 @@ function buildDropdown(items) {
                         window.showLockScreen();
                     }
                 }, 120);
+            });
+        }
+        // Icons menu actions — hardcoded repo, no URL input needed
+        if (item.label === "Browse Icon Packs") {
+            btn.addEventListener("click", () => {
+                closeAllMenus();
+                setTimeout(() => {
+                    if (typeof window.openIconPackPanel === "function") {
+                        window.openIconPackPanel();
+                    }
+                }, 120);
+            });
+        }
+        if (item.label === "Reset to Default") {
+            btn.addEventListener("click", () => {
+                closeAllMenus();
+                window.__iconPackManager?.applyPack("default");
+            });
+        }
+        if (item.label === "Blue Pack") {
+            btn.addEventListener("click", () => {
+                closeAllMenus();
+                window.__iconPackManager?.applyPack("blue");
+            });
+        }
+        if (item.label === "Dark Pack") {
+            btn.addEventListener("click", () => {
+                closeAllMenus();
+                window.__iconPackManager?.applyPack("dark");
             });
         }
         section.appendChild(btn);
