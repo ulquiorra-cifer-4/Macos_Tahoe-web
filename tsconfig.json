@@ -37,6 +37,12 @@
     "apps/reminders/reminders-item.ts",
     "apps/reminders/reminders-detail.ts",
     "apps/reminders/reminders-app.ts",
+    "apps/music/music-store.ts",
+    "apps/music/music-player.ts",
+    "apps/music/music-sidebar.ts",
+    "apps/music/music-content.ts",
+    "apps/music/music-playbar.ts",
+    "apps/music/music-app.ts",
     "icon-pack-manager.ts"
   ]
 }
