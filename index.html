@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="apps/finder/finder.css" />
   <link rel="stylesheet" href="apps/photos/photos.css" />
   <link rel="stylesheet" href="apps/reminders/reminders.css" />
+  <link rel="stylesheet" href="apps/music/music.css" />
   <link rel="stylesheet" href="icon-pack-manager.css" />
 </head>
 <body>
@@ -63,6 +64,14 @@
   <script src="apps/reminders/reminders-item.js"></script>
   <script src="apps/reminders/reminders-detail.js"></script>
   <script src="apps/reminders/reminders-app.js"></script>
+
+  <!-- Music app — store must load before player, player before UI -->
+  <script src="apps/music/music-store.js"></script>
+  <script src="apps/music/music-player.js"></script>
+  <script src="apps/music/music-sidebar.js"></script>
+  <script src="apps/music/music-content.js"></script>
+  <script src="apps/music/music-playbar.js"></script>
+  <script src="apps/music/music-app.js"></script>
 
   <!-- Icon pack manager — must load before dock so it can intercept icon loads -->
   <script src="icon-pack-manager.js"></script>
