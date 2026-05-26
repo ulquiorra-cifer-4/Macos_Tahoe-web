@@ -1,8 +1,8 @@
 "use strict";
 // ============================================================
-//  Music App — music-app.js  (v2)
-//  Topbar with search replaces sidebar search (fixes traffic-light overlap)
-//  Assembles: topbar + sidebar + content + playbar-wrapper
+//  Music App — music-app.js  (v3)
+//  No topbar — window manager handles traffic lights natively.
+//  Search lives in sidebar top (same as original Notes pattern).
 // ============================================================
 
 class MusicApp {
@@ -18,50 +18,15 @@ class MusicApp {
   }
 
   _build() {
-    // ── Topbar (traffic lights clearance + search) ──
-    const topbar = document.createElement("div");
-    topbar.className = "mu-topbar";
-    topbar.innerHTML = `
-      <div class="mu-topbar-spacer"></div>
-      <div class="mu-topbar-search-wrap">
-        <svg class="mu-topbar-search-icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
-          <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-        </svg>
-        <input class="mu-topbar-search-input" type="text" placeholder="Search" id="muTopbarSearch" />
-      </div>
-    `;
-
-    // Search wiring
-    const searchInput = topbar.querySelector("#muTopbarSearch");
-    let searchTimer = null;
-    searchInput.addEventListener("input", e => {
-      clearTimeout(searchTimer);
-      const q = e.target.value.trim();
-      searchTimer = setTimeout(() => {
-        this.sidebar.navigateTo("search");
-        this.content.showView("search", q);
-      }, 180);
-    });
-    searchInput.addEventListener("focus", () => {
-      this.sidebar.navigateTo("search");
-      this.content.showView("search", searchInput.value.trim());
-    });
-    // Clear search when navigating away via sidebar
-    this._clearSearch = () => { searchInput.value = ""; };
-
-    // ── Sidebar ──
+    // ── Sidebar (has search inside at top) ──
     this.sidebar = new MusicSidebar({
-      onNavigate: (viewId, extra) => {
-        if (viewId !== "search") this._clearSearch();
-        this._navigate(viewId, extra);
-      },
+      onNavigate: (viewId, extra) => this._navigate(viewId, extra),
     });
 
     // ── Content ──
     this.content = new MusicContent({
       onPlaySong: (songId, queue) => this.store.playSong(songId, queue),
       onNavigate: (viewId, extra) => {
-        if (viewId !== "search") this._clearSearch();
         this.sidebar.navigateTo(viewId);
         this._navigate(viewId, extra);
       },
@@ -75,9 +40,9 @@ class MusicApp {
     body.className = "mu-body";
     body.append(this.sidebar.el, this.content.el);
 
-    this.el.append(topbar, body, this.playbar.el);
+    // No topbar — just body + playbar
+    this.el.append(body, this.playbar.el);
 
-    // Default view
     this._navigate("home");
   }
 
@@ -93,9 +58,7 @@ class MusicApp {
     }
   }
 
-  _onStoreChange() {
-    this.content.refresh();
-  }
+  _onStoreChange() { this.content.refresh(); }
 }
 
 // ── Register global ──
