@@ -1,8 +1,8 @@
 "use strict";
 // ============================================================
-//  Music App — music-sidebar.js  (v2)
-//  Search bar REMOVED from sidebar — now lives in music-app.js topbar
-//  Fixes traffic-light overlap issue
+//  Music App — music-sidebar.js  (v3)
+//  Search bar back at top of sidebar with 80px top padding
+//  to clear the window-manager traffic lights zone.
 // ============================================================
 
 class MusicSidebar {
@@ -20,15 +20,40 @@ class MusicSidebar {
   _build() {
     this.el.innerHTML = "";
 
-    // ── Nav items (no search bar here anymore) ──
+    // ── Search bar — sits in the traffic-lights safe zone ──
+    // 44px top padding pushes it below where traffic lights live
+    const searchWrap = document.createElement("div");
+    searchWrap.className = "mu-sidebar-search";
+    searchWrap.innerHTML = `
+      <svg class="mu-search-icon" viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+        <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <input class="mu-search-input" type="text" placeholder="Search" />
+    `;
+    const searchInput = searchWrap.querySelector(".mu-search-input");
+    let searchTimer = null;
+    searchInput.addEventListener("input", e => {
+      clearTimeout(searchTimer);
+      const q = e.target.value.trim();
+      searchTimer = setTimeout(() => {
+        this._navigate("search", q);
+      }, 180);
+    });
+    searchInput.addEventListener("focus", () => {
+      this._navigate("search", searchInput.value.trim());
+    });
+    // Expose clear so content nav can reset it
+    this._searchInput = searchInput;
+    this.el.appendChild(searchWrap);
+
+    // ── Top nav ──
     const navItems = [
       { id: "home",  icon: this._homeIcon(),  label: "Home"  },
       { id: "new",   icon: this._newIcon(),   label: "New"   },
       { id: "radio", icon: this._radioIcon(), label: "Radio" },
     ];
-
     const navEl = document.createElement("div");
-    navEl.className = "mu-sidebar-section mu-sidebar-section-top";
+    navEl.className = "mu-sidebar-section";
     navItems.forEach(item => navEl.appendChild(this._makeNavBtn(item.id, item.icon, item.label)));
     this.el.appendChild(navEl);
 
@@ -44,7 +69,6 @@ class MusicSidebar {
       { id: "albums",         icon: this._albumsIcon(),  label: "Albums"         },
       { id: "songs",          icon: this._songsIcon(),   label: "Songs"          },
     ];
-
     const libEl = document.createElement("div");
     libEl.className = "mu-sidebar-section";
     libItems.forEach(item => libEl.appendChild(this._makeNavBtn(item.id, item.icon, item.label)));
@@ -67,7 +91,10 @@ class MusicSidebar {
     btn.className = "mu-nav-btn" + (id === this.activeId ? " active" : "");
     btn.dataset.navId = id;
     btn.innerHTML = `<span class="mu-nav-icon">${iconHtml}</span><span class="mu-nav-label">${label}</span>`;
-    btn.addEventListener("click", () => this._navigate(id));
+    btn.addEventListener("click", () => {
+      if (this._searchInput) this._searchInput.value = "";
+      this._navigate(id);
+    });
     return btn;
   }
 
@@ -90,14 +117,14 @@ class MusicSidebar {
     allBtn.className = "mu-nav-btn" + (this.activeId === "all-playlists" ? " active" : "");
     allBtn.dataset.navId = "all-playlists";
     allBtn.innerHTML = `<span class="mu-nav-icon">${this._allPlaylistsIcon()}</span><span class="mu-nav-label">All Playlists</span>`;
-    allBtn.addEventListener("click", () => this._navigate("all-playlists"));
+    allBtn.addEventListener("click", () => { if (this._searchInput) this._searchInput.value = ""; this._navigate("all-playlists"); });
     this.playlistsEl.appendChild(allBtn);
 
     const favBtn = document.createElement("button");
     favBtn.className = "mu-nav-btn" + (this.activeId === "liked" ? " active" : "");
     favBtn.dataset.navId = "liked";
     favBtn.innerHTML = `<span class="mu-nav-icon">${this._heartIcon()}</span><span class="mu-nav-label">Favourite Songs</span>`;
-    favBtn.addEventListener("click", () => this._navigate("liked"));
+    favBtn.addEventListener("click", () => { if (this._searchInput) this._searchInput.value = ""; this._navigate("liked"); });
     this.playlistsEl.appendChild(favBtn);
 
     this.store.getPlaylists().forEach(pl => {
@@ -105,17 +132,17 @@ class MusicSidebar {
       btn.className = "mu-nav-btn mu-nav-playlist" + (this.activeId === `playlist:${pl.id}` ? " active" : "");
       btn.dataset.navId = `playlist:${pl.id}`;
       btn.innerHTML = `<span class="mu-nav-icon">${this._playlistIcon()}</span><span class="mu-nav-label">${pl.title}</span>`;
-      btn.addEventListener("click", () => this._navigate(`playlist:${pl.id}`));
+      btn.addEventListener("click", () => { if (this._searchInput) this._searchInput.value = ""; this._navigate(`playlist:${pl.id}`); });
       this.playlistsEl.appendChild(btn);
     });
   }
 
-  _refreshPlaylists() {
-    this._renderPlaylists();
-    this._updateActive();
-  }
+  _refreshPlaylists() { this._renderPlaylists(); this._updateActive(); }
 
-  navigateTo(id) { this._navigate(id); }
+  navigateTo(id) {
+    if (id !== "search" && this._searchInput) this._searchInput.value = "";
+    this._navigate(id);
+  }
 
   // ── icons ──
   _homeIcon()        { return `<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`; }
