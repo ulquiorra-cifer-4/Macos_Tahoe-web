@@ -35,6 +35,11 @@ class MusicApp {
     // ── Playbar (pill + expanded) ──
     this.playbar = new MusicPlaybar();
 
+    // Wire radio player → playbar sync
+    if (window.__radioPlayer) {
+      window.__radioPlayer.subscribe(() => this.playbar._sync());
+    }
+
     // ── Body row ──
     const body = document.createElement("div");
     body.className = "mu-body";
