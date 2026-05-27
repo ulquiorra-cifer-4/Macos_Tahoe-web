@@ -19,6 +19,8 @@ class MusicContent {
   }
 
   showView(viewId, extra = null) {
+    // Unsubscribe radio listener when leaving radio view
+    if (this._radioUnsub) { this._radioUnsub(); this._radioUnsub = null; }
     this._currentView = viewId;
     this._currentExtra = extra;
     this._render();
@@ -125,21 +127,166 @@ class MusicContent {
   }
 
   // ─────────────────────────────────────────────
-  //  RADIO (placeholder)
+  //  RADIO — live stations
   // ─────────────────────────────────────────────
   _renderRadio() {
-    const scroll = this._scrollWrap();
-    scroll.innerHTML = `
-      <div class="mu-content-header">
-        <h1 class="mu-page-title">Radio</h1>
+    const scroll  = this._scrollWrap();
+    const radio   = window.__radioPlayer;
+    const stations = radio ? radio.getStations() : [];
+
+    // Header
+    scroll.appendChild(this._pageHeader("Radio"));
+
+    // Featured now-playing hero (shows current station if playing)
+    this._radioHero = document.createElement("div");
+    this._radioHero.className = "mu-radio-hero";
+    this._renderRadioHero();
+    scroll.appendChild(this._radioHero);
+
+    // Station grid
+    scroll.appendChild(this._sectionHeader("Live Stations", null));
+    const grid = document.createElement("div");
+    grid.className = "mu-radio-grid";
+    grid.id = "muRadioGrid";
+
+    stations.forEach(station => {
+      grid.appendChild(this._makeRadioCard(station));
+    });
+    scroll.appendChild(grid);
+    this.el.appendChild(scroll);
+
+    // Subscribe to radio player changes → refresh card highlights + hero
+    if (radio) {
+      this._radioUnsub = radio.subscribe(() => {
+        this._renderRadioHero();
+        this._refreshRadioCards();
+      });
+    }
+  }
+
+  _renderRadioHero() {
+    const radio   = window.__radioPlayer;
+    const hero    = this._radioHero;
+    if (!hero) return;
+
+    const station = radio?.getStation();
+    const playing = radio?.isPlaying ?? false;
+
+    if (!station) {
+      hero.innerHTML = `
+        <div class="mu-radio-hero-empty">
+          <div class="mu-radio-hero-empty-icon">📻</div>
+          <div class="mu-radio-hero-empty-text">Pick a station below to start listening</div>
+        </div>
+      `;
+      return;
+    }
+
+    hero.style.background = `linear-gradient(135deg, ${station.color}ff 0%, ${station.color}88 60%, transparent 100%)`;
+    hero.innerHTML = `
+      <div class="mu-radio-hero-art-wrap">
+        <img class="mu-radio-hero-art" src="${station.artwork}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="mu-radio-hero-art-fall" style="display:none">${station.emoji}</div>
       </div>
-      <div class="mu-empty-state">
-        <div class="mu-empty-icon">📻</div>
-        <div class="mu-empty-title">Radio Coming Soon</div>
-        <div class="mu-empty-sub">Live radio stations will be available here.</div>
+      <div class="mu-radio-hero-info">
+        <div class="mu-radio-hero-live">
+          <span class="mu-radio-live-dot ${playing ? "pulsing" : ""}"></span>
+          ${playing ? "LIVE" : "PAUSED"}
+        </div>
+        <h2 class="mu-radio-hero-name">${station.name}</h2>
+        <div class="mu-radio-hero-tagline">${station.tagline}</div>
+        <div class="mu-radio-hero-meta">${station.genre} &nbsp;·&nbsp; ${station.source}</div>
+        <div class="mu-radio-hero-controls">
+          <button class="mu-play-btn mu-radio-hero-play" id="muRadioHeroPlay">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              ${playing
+                ? `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`
+                : `<path d="M8 5v14l11-7z"/>`}
+            </svg>
+            ${playing ? "Pause" : "Play"}
+          </button>
+          <button class="mu-radio-stop-btn" id="muRadioStop" title="Stop & close station">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path d="M6 6h12v12H6z"/>
+            </svg>
+            Stop
+          </button>
+        </div>
       </div>
     `;
-    this.el.appendChild(scroll);
+
+    hero.querySelector("#muRadioHeroPlay")?.addEventListener("click", () => radio?.togglePlay());
+    hero.querySelector("#muRadioStop")?.addEventListener("click",     () => radio?.stop());
+  }
+
+  _makeRadioCard(station) {
+    const radio   = window.__radioPlayer;
+    const active  = radio?.currentId === station.id;
+    const playing = active && (radio?.isPlaying ?? false);
+
+    const card = document.createElement("div");
+    card.className = "mu-radio-card mu-clickable" + (active ? " active" : "");
+    card.dataset.stationId = station.id;
+    card.style.setProperty("--rc", station.color);
+
+    card.innerHTML = `
+      <div class="mu-radio-card-art-wrap" style="background:${station.color}">
+        <img class="mu-radio-card-art" src="${station.artwork}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="mu-radio-card-emoji" style="display:none">${station.emoji}</div>
+        ${active ? `<div class="mu-radio-card-overlay">
+          <div class="mu-radio-live-dot${playing ? " pulsing" : ""}"></div>
+          <span>${playing ? "LIVE" : "⏸"}</span>
+        </div>` : `<div class="mu-radio-card-play-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
+        </div>`}
+      </div>
+      <div class="mu-radio-card-info">
+        <div class="mu-radio-card-name">${station.name}</div>
+        <div class="mu-radio-card-genre">${station.genre}</div>
+        <div class="mu-radio-card-source">${station.source}</div>
+      </div>
+    `;
+
+    card.addEventListener("click", () => {
+      if (active) {
+        radio?.togglePlay();
+      } else {
+        radio?.play(station.id);
+      }
+    });
+
+    return card;
+  }
+
+  _refreshRadioCards() {
+    const grid = this.el.querySelector("#muRadioGrid");
+    if (!grid) return;
+    const radio = window.__radioPlayer;
+    grid.querySelectorAll(".mu-radio-card").forEach(card => {
+      const id     = card.dataset.stationId;
+      const active = radio?.currentId === id;
+      const playing= active && (radio?.isPlaying ?? false);
+      card.classList.toggle("active", active);
+
+      const wrap = card.querySelector(".mu-radio-card-art-wrap");
+      // Remove old overlay/play-btn
+      wrap.querySelector(".mu-radio-card-overlay")?.remove();
+      wrap.querySelector(".mu-radio-card-play-btn")?.remove();
+
+      if (active) {
+        const ov = document.createElement("div");
+        ov.className = "mu-radio-card-overlay";
+        ov.innerHTML = `<div class="mu-radio-live-dot${playing ? " pulsing" : ""}"></div><span>${playing ? "LIVE" : "⏸"}</span>`;
+        wrap.appendChild(ov);
+      } else {
+        const pb = document.createElement("div");
+        pb.className = "mu-radio-card-play-btn";
+        pb.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>`;
+        wrap.appendChild(pb);
+      }
+    });
   }
 
   // ─────────────────────────────────────────────
@@ -659,4 +806,3 @@ class MusicContent {
 
   refresh() { this._render(); }
 }
- 
