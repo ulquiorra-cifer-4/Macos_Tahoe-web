@@ -39,6 +39,7 @@
     "apps/reminders/reminders-app.ts",
     "apps/music/music-store.ts",
     "apps/music/music-player.ts",
+    "apps/music/music-radio.ts",
     "apps/music/music-sidebar.ts",
     "apps/music/music-content.ts",
     "apps/music/music-playbar.ts",
