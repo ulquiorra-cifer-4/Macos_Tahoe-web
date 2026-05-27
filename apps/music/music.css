@@ -547,3 +547,166 @@
 #desktop.dark-mode .mu-pill-btn:hover { color: #fff; background: rgba(255,255,255,0.09); }
 #desktop.dark-mode .mu-pill-btn.active { color: #ff2d55; }
 #desktop.dark-mode .mu-pill-left:hover { background: rgba(255,255,255,0.06); }
+
+/* ══════════════════════════════════════
+   RADIO
+   ══════════════════════════════════════ */
+
+/* ── Hero (now playing) ── */
+.mu-radio-hero {
+  margin: 0 28px 8px;
+  border-radius: 18px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-height: 120px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0a0a14 100%);
+  transition: background 600ms ease;
+  overflow: hidden;
+  position: relative;
+}
+.mu-radio-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  backdrop-filter: blur(0px);
+  border-radius: 18px;
+  border: 0.5px solid rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+
+.mu-radio-hero-empty {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; justify-content: center; padding: 12px 0;
+}
+.mu-radio-hero-empty-icon { font-size: 36px; opacity: 0.5; }
+.mu-radio-hero-empty-text { font-size: 14px; color: rgba(255,255,255,0.45); }
+
+.mu-radio-hero-art-wrap {
+  width: 80px; height: 80px; border-radius: 12px;
+  overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+}
+.mu-radio-hero-art { width: 100%; height: 100%; object-fit: cover; }
+.mu-radio-hero-art-fall { font-size: 36px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+.mu-radio-hero-info { flex: 1; min-width: 0; }
+.mu-radio-hero-live {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.55); text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.mu-radio-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4caf50; flex-shrink: 0;
+}
+.mu-radio-live-dot.pulsing {
+  animation: mu-pulse 1.4s ease-in-out infinite;
+}
+@keyframes mu-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+.mu-radio-hero-name {
+  font-size: 20px; font-weight: 800; color: #fff;
+  margin: 0 0 3px; letter-spacing: -0.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mu-radio-hero-tagline {
+  font-size: 13px; color: rgba(255,255,255,0.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.mu-radio-hero-meta { font-size: 11.5px; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
+.mu-radio-hero-controls { display: flex; gap: 10px; align-items: center; }
+
+.mu-radio-stop-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 16px; border-radius: 20px;
+  background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.75);
+  border: 0.5px solid rgba(255,255,255,0.15); cursor: pointer;
+  font-size: 13px; font-weight: 600;
+  font-family: -apple-system, sans-serif;
+  transition: background 120ms;
+}
+.mu-radio-stop-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+/* ── Station grid ── */
+.mu-radio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 0 28px 28px;
+}
+
+.mu-radio-card {
+  display: flex; flex-direction: column; gap: 8px;
+  border-radius: 12px; overflow: hidden;
+  background: rgba(0,0,0,0.03);
+  border: 0.5px solid rgba(0,0,0,0.07);
+  transition: transform 140ms, box-shadow 140ms;
+  cursor: pointer;
+}
+.mu-radio-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.mu-radio-card.active {
+  border-color: rgba(255,45,85,0.4);
+  box-shadow: 0 0 0 1.5px rgba(255,45,85,0.3), 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.mu-radio-card-art-wrap {
+  width: 100%; aspect-ratio: 1;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.mu-radio-card-art { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mu-radio-card-emoji { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 52px; }
+
+.mu-radio-card-play-btn {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.0);
+  color: transparent;
+  transition: background 140ms, color 140ms;
+}
+.mu-radio-card:hover .mu-radio-card-play-btn {
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+}
+
+.mu-radio-card-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.38);
+  color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+}
+
+.mu-radio-card-info { padding: 6px 10px 10px; }
+.mu-radio-card-name {
+  font-size: 13px; font-weight: 700; color: #1c1c1e;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.mu-radio-card.active .mu-radio-card-name { color: #ff2d55; }
+.mu-radio-card-genre {
+  font-size: 11px; color: rgba(0,0,0,0.45);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mu-radio-card-source {
+  font-size: 10.5px; color: rgba(0,0,0,0.3); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── Dark mode radio ── */
+#desktop.dark-mode .mu-radio-card            { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.07); }
+#desktop.dark-mode .mu-radio-card-name       { color: #f5f5f7; }
+#desktop.dark-mode .mu-radio-card.active .mu-radio-card-name { color: #ff2d55; }
+#desktop.dark-mode .mu-radio-card-genre      { color: rgba(255,255,255,0.38); }
+#desktop.dark-mode .mu-radio-card-source     { color: rgba(255,255,255,0.22); }
