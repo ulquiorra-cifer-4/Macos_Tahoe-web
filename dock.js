@@ -204,3 +204,21 @@ buildDock();
 buildCalendar();
 const msToMid = () => { const n = new Date(); return (86400 - n.getHours() * 3600 - n.getMinutes() * 60 - n.getSeconds()) * 1000; };
 setTimeout(() => { buildCalendar(); setInterval(buildCalendar, 86_400_000); }, msToMid());
+
+// ── Dock entrance animation (called on unlock) ──
+window.__animateDock = function () {
+  const items = document.querySelectorAll("#dock .dock-item, #dock .dock-separator");
+  items.forEach((el, i) => {
+    el.style.opacity   = "0";
+    el.style.transform = "translateY(20px)";
+    el.style.transition = "none";
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        el.style.transition = `opacity 380ms cubic-bezier(0.34,1.56,0.64,1) ${i * 22}ms,
+                               transform 380ms cubic-bezier(0.34,1.56,0.64,1) ${i * 22}ms`;
+        el.style.opacity   = "1";
+        el.style.transform = "translateY(0)";
+      }, 30);
+    });
+  });
+};
