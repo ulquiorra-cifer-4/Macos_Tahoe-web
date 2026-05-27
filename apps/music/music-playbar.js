@@ -396,6 +396,86 @@ class MusicPlaybar {
   //  SYNC
   // ─────────────────────────────────────────────
   _sync() {
+    // ── If radio is actively playing, show that instead ──
+    const radio = window.__radioPlayer;
+    if (radio?.isPlaying || (radio?.currentId && !this.store.state.isPlaying)) {
+      this._syncRadio(radio);
+      return;
+    }
+    this._syncMusic();
+  }
+
+  _syncRadio(radio) {
+    const station = radio.getStation();
+    const playing = radio.isPlaying;
+    const artUrl  = station?.artwork ?? null;
+
+    // pill art
+    const pa = this.pill.querySelector("#muPillArt");
+    const pf = this.pill.querySelector("#muPillArtFall");
+    if (pa && artUrl) {
+      pa.src = artUrl; pa.style.display = "block";
+      if (pf) pf.style.display = "none";
+      pa.onerror = () => { pa.style.display = "none"; if (pf) pf.style.display = "flex"; };
+    } else if (pa) { pa.style.display = "none"; if (pf) { pf.style.display = "flex"; pf.textContent = station?.emoji ?? "📻"; } }
+
+    // pill text
+    const pt  = this.pill.querySelector("#muPillTitle");
+    const par = this.pill.querySelector("#muPillArtist");
+    if (pt)  pt.textContent  = station?.name    ?? "Radio";
+    if (par) par.textContent = station?.tagline ?? "Live";
+
+    // pill play icon — for radio it toggles radio
+    const ppi = this.pill.querySelector("#muPillPlayIcon");
+    if (ppi) ppi.innerHTML = playing
+      ? `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`
+      : `<path d="M8 5v14l11-7z"/>`;
+
+    // Hide scrubber fill for radio (live stream — no duration)
+    this._setPillFill(0);
+    const pc = this.pill.querySelector("#muPillCurr"); if (pc) pc.textContent = "LIVE";
+    const pd = this.pill.querySelector("#muPillDur");  if (pd) pd.textContent = "—";
+
+    // Wire play btn to radio toggle instead of store
+    const playBtn = this.pill.querySelector("#muPillPlay");
+    if (playBtn && !playBtn._radioWired) {
+      playBtn._radioWired = true;
+      playBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.__radioPlayer?.currentId) {
+          window.__radioPlayer.togglePlay();
+        } else {
+          this.store.togglePlay();
+        }
+      });
+    }
+
+    // Volume
+    const { volume } = this.store.state;
+    const vf = this.pill.querySelector("#muPillVolFill");  if (vf) vf.style.width = (volume*100)+"%";
+    const vt = this.pill.querySelector("#muPillVolThumb"); if (vt) vt.style.left  = (volume*100)+"%";
+
+    // expanded — show radio info too
+    const ea = this.exp.querySelector("#muExpArt");
+    const ef = this.exp.querySelector("#muExpArtFall");
+    if (ea && artUrl) { ea.src = artUrl; ea.style.display = "block"; if (ef) ef.style.display = "none"; }
+    else if (ea) { ea.style.display = "none"; if (ef) { ef.style.display = "flex"; ef.textContent = station?.emoji ?? "📻"; } }
+    const bg = this.exp.querySelector("#muExpBg");
+    if (bg && station) bg.style.background = `linear-gradient(160deg, ${station.color}ff 0%, ${station.color}99 50%, #0a0a0f 100%)`;
+    const et  = this.exp.querySelector("#muExpTitle");   if (et) et.textContent = station?.name    ?? "Radio";
+    const ear = this.exp.querySelector("#muExpArtist");  if (ear) ear.textContent = `${station?.genre ?? ""} · ${station?.source ?? ""}`;
+    const epi = this.exp.querySelector("#muExpPlayIcon");
+    if (epi) epi.innerHTML = playing
+      ? `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`
+      : `<path d="M8 5v14l11-7z"/>`;
+    this._setExpFill(0);
+    const ec = this.exp.querySelector("#muExpCurr"); if (ec) ec.textContent = "LIVE";
+    const ed = this.exp.querySelector("#muExpDur");  if (ed) ed.textContent = "—";
+    const evf = this.exp.querySelector("#muExpVolFill");  if (evf) evf.style.width = (volume*100)+"%";
+    const evt = this.exp.querySelector("#muExpVolThumb"); if (evt) evt.style.left  = (volume*100)+"%";
+  }
+
+  _syncMusic() {
     const { isPlaying, shuffle, repeat, volume, currentSongId } = this.store.state;
     const song   = currentSongId ? this.store.getSong(currentSongId) : null;
     const album  = song ? this.store.getAlbum(song.albumId)   : null;
@@ -485,5 +565,5 @@ class MusicPlaybar {
     // ── expanded volume ──
     const evf = this.exp.querySelector("#muExpVolFill");  if (evf) evf.style.width = (volume*100)+"%";
     const evt = this.exp.querySelector("#muExpVolThumb"); if (evt) evt.style.left  = (volume*100)+"%";
-  }
-}
+  }  // end _syncMusic
+}  // end MusicPlaybar
