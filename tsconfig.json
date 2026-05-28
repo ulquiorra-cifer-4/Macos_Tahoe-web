@@ -21,6 +21,7 @@
     "apps/notes/notes-store.ts",
     "apps/notes/notes-editor.ts",
     "apps/notes/notes-app.ts",
+    "apps/finder/finder-icons.ts",
     "apps/finder/finder-fs.ts",
     "apps/finder/finder-sidebar.ts",
     "apps/finder/finder-toolbar.ts",
@@ -47,3 +48,4 @@
     "icon-pack-manager.ts"
   ]
 }
+ 
