@@ -17,56 +17,54 @@
 </head>
 <body>
   <div id="desktop">
-
-    <!-- Wallpaper -->
     <div id="wallpaperLayer"></div>
-
-    <!-- Menu Bar — built by menubar.js -->
     <div id="menuBar"></div>
-
-    <!-- Windows Area -->
     <div id="windows-area"></div>
-
-    <!-- Dock -->
     <div id="dockContainer">
       <div id="dock"></div>
     </div>
-
   </div>
 
-  <!-- Lock screen — loads first so it's visible immediately -->
+  <!-- Lock screen -->
   <script src="lockscreen.js"></script>
 
   <!-- Core -->
   <script src="window-manager.js"></script>
 
-  <!-- Apps -->
+  <!-- Finder: icons + FS must load first (trash depends on trashStore) -->
+  <script src="apps/finder/finder-icons.js"></script>
+  <script src="apps/finder/finder-fs.js"></script>
+
+  <!-- Trash (depends on __trashStore from finder-fs) -->
   <script src="apps/trash.js"></script>
+
+  <!-- Notes -->
   <script src="apps/notes/notes-store.js"></script>
   <script src="apps/notes/notes-editor.js"></script>
   <script src="apps/notes/notes-app.js"></script>
-  <script src="apps/finder/finder-fs.js"></script>
+
+  <!-- Finder UI (depends on finder-fs + finder-icons) -->
   <script src="apps/finder/finder-sidebar.js"></script>
   <script src="apps/finder/finder-toolbar.js"></script>
   <script src="apps/finder/finder-grid.js"></script>
   <script src="apps/finder/finder-preview.js"></script>
   <script src="apps/finder/finder-app.js"></script>
 
-  <!-- Photos app -->
+  <!-- Photos -->
   <script src="apps/photos/photos-store.js"></script>
   <script src="apps/photos/photos-sidebar.js"></script>
   <script src="apps/photos/photos-grid.js"></script>
   <script src="apps/photos/photos-lightbox.js"></script>
   <script src="apps/photos/photos-app.js"></script>
 
-  <!-- Reminders app -->
+  <!-- Reminders -->
   <script src="apps/reminders/reminders-store.js"></script>
   <script src="apps/reminders/reminders-sidebar.js"></script>
   <script src="apps/reminders/reminders-item.js"></script>
   <script src="apps/reminders/reminders-detail.js"></script>
   <script src="apps/reminders/reminders-app.js"></script>
 
-  <!-- Music app — store must load before player, player before UI -->
+  <!-- Music (store → player → radio → UI) -->
   <script src="apps/music/music-store.js"></script>
   <script src="apps/music/music-player.js"></script>
   <script src="apps/music/music-radio.js"></script>
@@ -75,17 +73,16 @@
   <script src="apps/music/music-playbar.js"></script>
   <script src="apps/music/music-app.js"></script>
 
-  <!-- Icon pack manager — must load before dock so it can intercept icon loads -->
+  <!-- Icon pack manager -->
   <script src="icon-pack-manager.js"></script>
 
-  <!-- Desktop manager — needs FS loaded first -->
+  <!-- Desktop manager -->
   <script src="desktop-manager.js"></script>
 
-  <!-- Menu bar + Dock — last so everything is registered -->
+  <!-- Menubar + Dock (last) -->
   <script src="menubar.js"></script>
   <script src="dock.js"></script>
 
-  <!-- Boot desktop manager after all scripts are ready -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       if (typeof window.__initDesktopManager === "function") {
@@ -93,20 +90,12 @@
       }
     });
 
-    // ── Menubar + Dock entrance animation on unlock ──
-    // Patches showLockScreen to also fire __onDesktopUnlock after hide
+    // Menubar + Dock entrance animation on unlock
     (function() {
       function _patchUnlock() {
-        const orig = window.showLockScreen;
-        // Watch for lockscreen element becoming hidden (opacity 0 / display none)
-        // via MutationObserver on the lockscreen element
         const ls = document.getElementById("lockScreen") ||
                    document.querySelector(".lock-screen, #lockscreen, [id*='lock']");
-        if (!ls) {
-          // Retry after scripts load
-          setTimeout(_patchUnlock, 400);
-          return;
-        }
+        if (!ls) { setTimeout(_patchUnlock, 400); return; }
         const obs = new MutationObserver(() => {
           const hidden = ls.style.display === "none" ||
                          ls.style.opacity === "0"    ||
@@ -114,7 +103,6 @@
                          ls.classList.contains("hidden") ||
                          ls.classList.contains("gone");
           if (hidden) {
-            // Trigger animations
             if (typeof window.__animateMenuBar === "function") window.__animateMenuBar();
             if (typeof window.__animateDock    === "function") window.__animateDock();
           }
@@ -126,3 +114,4 @@
   </script>
 </body>
 </html>
+ 
