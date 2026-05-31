@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="apps/photos/photos.css" />
   <link rel="stylesheet" href="apps/reminders/reminders.css" />
   <link rel="stylesheet" href="apps/music/music.css" />
+  <link rel="stylesheet" href="apps/videos/video.css" />
   <link rel="stylesheet" href="icon-pack-manager.css" />
 </head>
 <body>
@@ -25,17 +26,14 @@
     </div>
   </div>
 
-  <!-- Lock screen -->
   <script src="lockscreen.js"></script>
-
-  <!-- Core -->
   <script src="window-manager.js"></script>
 
-  <!-- Finder: icons + FS must load first (trash depends on trashStore) -->
+  <!-- Finder: icons + FS first (trashStore lives here) -->
   <script src="apps/finder/finder-icons.js"></script>
   <script src="apps/finder/finder-fs.js"></script>
 
-  <!-- Trash (depends on __trashStore from finder-fs) -->
+  <!-- Trash (needs __trashStore) -->
   <script src="apps/trash.js"></script>
 
   <!-- Notes -->
@@ -43,7 +41,7 @@
   <script src="apps/notes/notes-editor.js"></script>
   <script src="apps/notes/notes-app.js"></script>
 
-  <!-- Finder UI (depends on finder-fs + finder-icons) -->
+  <!-- Finder UI -->
   <script src="apps/finder/finder-sidebar.js"></script>
   <script src="apps/finder/finder-toolbar.js"></script>
   <script src="apps/finder/finder-grid.js"></script>
@@ -64,7 +62,7 @@
   <script src="apps/reminders/reminders-detail.js"></script>
   <script src="apps/reminders/reminders-app.js"></script>
 
-  <!-- Music (store → player → radio → UI) -->
+  <!-- Music -->
   <script src="apps/music/music-store.js"></script>
   <script src="apps/music/music-player.js"></script>
   <script src="apps/music/music-radio.js"></script>
@@ -72,6 +70,11 @@
   <script src="apps/music/music-content.js"></script>
   <script src="apps/music/music-playbar.js"></script>
   <script src="apps/music/music-app.js"></script>
+
+  <!-- Videos -->
+  <script src="apps/videos/video-store.js"></script>
+  <script src="apps/videos/video-player-engine.js"></script>
+  <script src="apps/videos/video-app.js"></script>
 
   <!-- Icon pack manager -->
   <script src="icon-pack-manager.js"></script>
@@ -90,7 +93,6 @@
       }
     });
 
-    // Menubar + Dock entrance animation on unlock
     (function() {
       function _patchUnlock() {
         const ls = document.getElementById("lockScreen") ||
@@ -98,7 +100,7 @@
         if (!ls) { setTimeout(_patchUnlock, 400); return; }
         const obs = new MutationObserver(() => {
           const hidden = ls.style.display === "none" ||
-                         ls.style.opacity === "0"    ||
+                         ls.style.opacity === "0" ||
                          ls.style.pointerEvents === "none" ||
                          ls.classList.contains("hidden") ||
                          ls.classList.contains("gone");
