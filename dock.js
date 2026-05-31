@@ -1,6 +1,6 @@
 "use strict";
 // ============================================================
-//  macOS Tahoe Web Emulator — dock.js  (UPDATED — Music integrated)
+//  dock.js  (v3) — "craft" replaced with "videos"
 // ============================================================
 const DOCK_ICONS = [
     { id: "finder",    label: "Finder",         src: "icons/finder.png",    emoji: "🔵", running: true  },
@@ -13,18 +13,18 @@ const DOCK_ICONS = [
     { id: "reminders", label: "Reminders",       src: "icons/reminders.png", emoji: "✅", running: false },
     { id: "notes",     label: "Notes",           src: "icons/notes.png",     emoji: "📝", running: false },
     { id: "music",     label: "Music",           src: "icons/music.png",     emoji: "🎵", running: false },
+    { id: "videos",    label: "Videos",          src: "icons/videos.png",    emoji: "🎬", running: false },
     { id: "appstore",  label: "App Store",       src: "icons/appstore.png",  emoji: "🅰️", running: false },
     { id: "_sep1",     label: "", src: "", emoji: "", running: false, separator: true },
     { id: "notion",    label: "Notion",          src: "icons/notion.png",    emoji: "N",  running: false },
-    { id: "craft",     label: "Craft",           src: "icons/craft.png",     emoji: "✏️", running: false },
     { id: "_sep2",     label: "", src: "", emoji: "", running: false, separator: true },
     { id: "trash",     label: "Trash",           src: "icons/trash.png",     emoji: "🗑️", running: false },
 ];
-// ── Spring magnification constants ──
+
 const BASE_WIDTH = 57.6;
 const DIST_LIMIT = BASE_WIDTH * 6;
-const DIST_INPUT = [-DIST_LIMIT, -DIST_LIMIT / 1.25, -DIST_LIMIT / 2, 0, DIST_LIMIT / 2, DIST_LIMIT / 1.25, DIST_LIMIT];
-const WIDTH_OUT  = [BASE_WIDTH, BASE_WIDTH * 1.1, BASE_WIDTH * 1.414, BASE_WIDTH * 2, BASE_WIDTH * 1.414, BASE_WIDTH * 1.1, BASE_WIDTH];
+const DIST_INPUT = [-DIST_LIMIT, -DIST_LIMIT/1.25, -DIST_LIMIT/2, 0, DIST_LIMIT/2, DIST_LIMIT/1.25, DIST_LIMIT];
+const WIDTH_OUT  = [BASE_WIDTH, BASE_WIDTH*1.1, BASE_WIDTH*1.414, BASE_WIDTH*2, BASE_WIDTH*1.414, BASE_WIDTH*1.1, BASE_WIDTH];
 const DAMPING    = 0.47;
 const STIFFNESS  = 0.12;
 
@@ -75,7 +75,6 @@ function resetAll() {
     iconStates.forEach(s => { s.spring.target = BASE_WIDTH; s.raf = requestAnimationFrame(() => animateIcon(s)); });
 }
 
-// ── Build ──
 function buildDock() {
     dock.innerHTML = "";
     iconStates.length = 0;
@@ -87,7 +86,6 @@ function buildDock() {
             dock.appendChild(sep);
             return;
         }
-
         const wrap = document.createElement("button");
         wrap.className = "dock-item" + (icon.running ? " running" : "");
         wrap.dataset.id = icon.id;
@@ -97,10 +95,8 @@ function buildDock() {
         tooltip.textContent = icon.label;
 
         const img = new Image();
-        img.alt      = icon.label;
-        img.draggable = false;
-        img.style.width  = BASE_WIDTH + "px";
-        img.style.height = "auto";
+        img.alt = icon.label; img.draggable = false;
+        img.style.width = BASE_WIDTH + "px"; img.style.height = "auto";
 
         const state = { wrap, imgEl: img, spring: { value: BASE_WIDTH, target: BASE_WIDTH, velocity: 0 }, raf: 0 };
 
@@ -110,14 +106,12 @@ function buildDock() {
             em.textContent = icon.emoji;
             em.style.width = em.style.height = BASE_WIDTH + "px";
             em.style.fontSize = Math.round(BASE_WIDTH * 0.52) + "px";
-            img.replaceWith(em);
-            state.imgEl = em;
+            img.replaceWith(em); state.imgEl = em;
         };
         img.src = icon.src;
 
         const dot = document.createElement("div");
         dot.className = "dock-dot";
-
         wrap.append(tooltip, img, dot);
 
         wrap.addEventListener("click", () => {
@@ -130,9 +124,8 @@ function buildDock() {
             if (icon.id === "finder"    && typeof window.openFinderWindow    === "function") window.openFinderWindow();
             if (icon.id === "photos"    && typeof window.openPhotosWindow    === "function") window.openPhotosWindow();
             if (icon.id === "reminders" && typeof window.openRemindersWindow === "function") window.openRemindersWindow();
-
-            // ── Music ──
             if (icon.id === "music"     && typeof window.openMusicWindow     === "function") window.openMusicWindow();
+            if (icon.id === "videos"    && typeof window.openVideosWindow    === "function") window.openVideosWindow();
         });
 
         dock.appendChild(wrap);
@@ -149,16 +142,12 @@ dock.addEventListener("drop", (e) => {
     const file = e.dataTransfer?.files[0];
     if (!file?.type.startsWith("image/")) return;
     DOCK_ICONS.splice(DOCK_ICONS.length - 3, 0, {
-        id: "custom_" + Date.now(),
-        label: file.name.replace(/\.[^.]+$/, ""),
-        src: URL.createObjectURL(file),
-        emoji: "📦",
-        running: false,
+        id: "custom_" + Date.now(), label: file.name.replace(/\.[^.]+$/, ""),
+        src: URL.createObjectURL(file), emoji: "📦", running: false,
     });
     buildDock();
 });
 
-// ── Calendar ──
 function buildCalendar() {
     const el = document.getElementById("calendarWidget");
     if (!el) return;
@@ -177,7 +166,6 @@ function buildCalendar() {
     el.innerHTML = h + "</div>";
 }
 
-// ── Wallpaper ──
 (function () {
     const wl = document.getElementById("wallpaperLayer");
     function applyBlobUrl(blobUrl) {
@@ -189,36 +177,26 @@ function buildCalendar() {
     const savedWallpaper = localStorage.getItem("macos_wallpaper_v1");
     if (savedWallpaper) { applyBlobUrl(savedWallpaper); return; }
     const p = new Image();
-    p.onload = () => {
-        fetch("wallpaper.jpg")
-            .then(r => r.blob())
-            .then(blob => applyBlobUrl(URL.createObjectURL(blob)))
-            .catch(() => applyBlobUrl("wallpaper.jpg"));
-    };
+    p.onload = () => { fetch("wallpaper.jpg").then(r => r.blob()).then(blob => applyBlobUrl(URL.createObjectURL(blob))).catch(() => applyBlobUrl("wallpaper.jpg")); };
     p.onerror = () => applyGradient();
     p.src = "wallpaper.jpg?" + Date.now();
 })();
 
-// ── Init ──
 buildDock();
 buildCalendar();
-const msToMid = () => { const n = new Date(); return (86400 - n.getHours() * 3600 - n.getMinutes() * 60 - n.getSeconds()) * 1000; };
+const msToMid = () => { const n = new Date(); return (86400 - n.getHours()*3600 - n.getMinutes()*60 - n.getSeconds())*1000; };
 setTimeout(() => { buildCalendar(); setInterval(buildCalendar, 86_400_000); }, msToMid());
 
-// ── Dock entrance animation (called on unlock) ──
 window.__animateDock = function () {
-  const items = document.querySelectorAll("#dock .dock-item, #dock .dock-separator");
-  items.forEach((el, i) => {
-    el.style.opacity   = "0";
-    el.style.transform = "translateY(20px)";
-    el.style.transition = "none";
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        el.style.transition = `opacity 380ms cubic-bezier(0.34,1.56,0.64,1) ${i * 22}ms,
-                               transform 380ms cubic-bezier(0.34,1.56,0.64,1) ${i * 22}ms`;
-        el.style.opacity   = "1";
-        el.style.transform = "translateY(0)";
-      }, 30);
+    const items = document.querySelectorAll("#dock .dock-item, #dock .dock-separator");
+    items.forEach((el, i) => {
+        el.style.opacity = "0"; el.style.transform = "translateY(20px)"; el.style.transition = "none";
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                el.style.transition = `opacity 380ms cubic-bezier(0.34,1.56,0.64,1) ${i*22}ms, transform 380ms cubic-bezier(0.34,1.56,0.64,1) ${i*22}ms`;
+                el.style.opacity = "1"; el.style.transform = "translateY(0)";
+            }, 30);
+        });
     });
-  });
 };
+ 
