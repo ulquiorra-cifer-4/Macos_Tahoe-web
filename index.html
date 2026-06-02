@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="lockscreen.css" />
   <link rel="stylesheet" href="menubar.css" />
   <link rel="stylesheet" href="desktop.css" />
+  <link rel="stylesheet" href="window-minimize.css" />
   <link rel="stylesheet" href="apps/notes/notes.css" />
   <link rel="stylesheet" href="apps/finder/finder.css" />
   <link rel="stylesheet" href="apps/photos/photos.css" />
@@ -29,11 +30,12 @@
   <script src="lockscreen.js"></script>
   <script src="window-manager.js"></script>
 
-  <!-- Finder: icons + FS first (trashStore lives here) -->
+  <!-- Minimize patch — load right after window-manager -->
+  <script src="window-minimize.js"></script>
+
+  <!-- Finder -->
   <script src="apps/finder/finder-icons.js"></script>
   <script src="apps/finder/finder-fs.js"></script>
-
-  <!-- Trash (needs __trashStore) -->
   <script src="apps/trash.js"></script>
 
   <!-- Notes -->
@@ -82,7 +84,7 @@
   <!-- Desktop manager -->
   <script src="desktop-manager.js"></script>
 
-  <!-- Menubar + Dock (last) -->
+  <!-- Menubar + Dock -->
   <script src="menubar.js"></script>
   <script src="dock.js"></script>
 
@@ -116,4 +118,3 @@
   </script>
 </body>
 </html>
- 
