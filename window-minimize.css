@@ -1,0 +1,38 @@
+/* ============================================================
+   window-minimize.css
+   Minimized badge on dock icons + transition helpers
+   ============================================================ */
+
+/* ── Minimized dot badge on dock icon ── */
+.wm-minimized-badge {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  pointer-events: none;
+  animation: wm-badge-pop 300ms cubic-bezier(0.34,1.56,0.64,1) forwards;
+  z-index: 10;
+}
+
+@keyframes wm-badge-pop {
+  from { transform: translateX(-50%) scale(0); opacity: 0; }
+  to   { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ── Ensure dock-item is position:relative for badge ── */
+.dock-item { position: relative !important; }
+
+/* ── Window during minimize/restore — disable pointer events ── */
+.app-window[data-minimized="1"] {
+  pointer-events: none !important;
+}
+
+/* ── Smooth will-change hint for animated windows ── */
+.app-window {
+  will-change: transform, opacity;
+}
