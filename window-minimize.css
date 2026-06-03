@@ -1,38 +1,115 @@
 /* ============================================================
-   window-minimize.css
-   Minimized badge on dock icons + transition helpers
+   window-minimize.css  (v3)
+   Only adds what styles.css doesn't have:
+   • .app-window base styles
+   • Traffic light colours + icons
+   • Minimize dot badge
    ============================================================ */
 
-/* ── Minimized dot badge on dock icon ── */
-.wm-minimized-badge {
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+/* ── App window ── */
+.app-window {
+  border-radius: 12px;
+  overflow: hidden;
   background: #fff;
-  box-shadow: 0 0 4px rgba(0,0,0,0.5);
-  pointer-events: none;
-  animation: wm-badge-pop 300ms cubic-bezier(0.34,1.56,0.64,1) forwards;
-  z-index: 10;
+  will-change: transform, opacity;
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.22),
+    0 20px 60px rgba(0,0,0,0.40),
+    0 6px 18px rgba(0,0,0,0.20);
+  transition: box-shadow 180ms ease;
+}
+.app-window.active {
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.30),
+    0 26px 72px rgba(0,0,0,0.52),
+    0 8px 24px rgba(0,0,0,0.28);
 }
 
-@keyframes wm-badge-pop {
+#desktop.dark-mode .app-window {
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.08),
+    0 20px 60px rgba(0,0,0,0.60),
+    0 6px 18px rgba(0,0,0,0.40);
+}
+#desktop.dark-mode .app-window.active {
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.12),
+    0 26px 72px rgba(0,0,0,0.72),
+    0 8px 24px rgba(0,0,0,0.50);
+}
+
+/* ── Traffic lights container ── */
+.tl-container {
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 100;
+  padding: 13px 14px 0;
+  pointer-events: all;
+}
+
+.tl-lights {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Buttons */
+.tl-btn {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: none; cursor: default;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; position: relative; flex-shrink: 0;
+  transition: filter 80ms, transform 80ms;
+}
+.tl-btn:hover  { filter: brightness(0.82); transform: scale(1.08); }
+.tl-btn:active { transform: scale(0.90); }
+
+.tl-close    { background: #ff5f57; }
+.tl-minimize { background: #febc2e; }
+.tl-maximize { background: #28c840; }
+
+/* Icon inside each button — hidden until hover */
+.tl-icon {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  transition: opacity 80ms;
+}
+.tl-lights:hover .tl-icon { opacity: 1; }
+
+/* Unfocused window — grey all three */
+.tl-container.unfocused .tl-close,
+.tl-container.unfocused .tl-minimize,
+.tl-container.unfocused .tl-maximize {
+  background: rgba(0,0,0,0.22) !important;
+}
+#desktop.dark-mode .tl-container.unfocused .tl-close,
+#desktop.dark-mode .tl-container.unfocused .tl-minimize,
+#desktop.dark-mode .tl-container.unfocused .tl-maximize {
+  background: rgba(255,255,255,0.18) !important;
+}
+.tl-container.unfocused .tl-icon { opacity: 0 !important; }
+
+/* ── Minimized dot badge on dock icon ── */
+.dock-item { position: relative !important; overflow: visible !important; }
+
+.wm-mini-dot {
+  position: absolute;
+  bottom: -3px; left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.45);
+  pointer-events: none;
+  z-index: 20;
+  animation: wm-dot-pop 260ms cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes wm-dot-pop {
   from { transform: translateX(-50%) scale(0); opacity: 0; }
   to   { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
-/* ── Ensure dock-item is position:relative for badge ── */
-.dock-item { position: relative !important; }
-
-/* ── Window during minimize/restore — disable pointer events ── */
-.app-window[data-minimized="1"] {
-  pointer-events: none !important;
-}
-
-/* ── Smooth will-change hint for animated windows ── */
-.app-window {
-  will-change: transform, opacity;
-}
+/* Push existing running dot up 1px so they don't overlap */
+.dock-item.running .dock-dot { bottom: 0px; }
