@@ -71,10 +71,14 @@
 
 /* Icon inside each button — hidden until hover */
 .tl-icon {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px; height: 8px;
   opacity: 0;
   transition: opacity 80ms;
+  pointer-events: none;
+  overflow: visible;
 }
 .tl-lights:hover .tl-icon { opacity: 1; }
 
