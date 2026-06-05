@@ -69,18 +69,44 @@
 .tl-minimize { background: #febc2e; }
 .tl-maximize { background: #28c840; }
 
-/* Icon inside each button — hidden until hover */
-.tl-icon {
+/* ── Hide the SVG icons entirely — use CSS pseudo-elements instead ── */
+.tl-icon { display: none !important; }
+
+/* Show symbols via ::before on hover — pure CSS, crisp at any size */
+.tl-lights:hover .tl-close::before,
+.tl-lights:hover .tl-minimize::before,
+.tl-lights:hover .tl-maximize::before {
+  content: '';
   position: absolute;
   top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px; height: 8px;
-  opacity: 0;
-  transition: opacity 80ms;
   pointer-events: none;
-  overflow: visible;
 }
-.tl-lights:hover .tl-icon { opacity: 1; }
+
+/* Close × */
+.tl-lights:hover .tl-close::before {
+  width: 6px; height: 6px;
+  transform: translate(-50%,-50%);
+  background:
+    linear-gradient(rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.5) 100%) center/1px 6px no-repeat,
+    linear-gradient(rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.5) 100%) center/6px 1px no-repeat;
+  transform: translate(-50%,-50%) rotate(45deg);
+}
+
+/* Minimize — */
+.tl-lights:hover .tl-minimize::before {
+  width: 6px; height: 1px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 1px;
+  transform: translate(-50%,-50%);
+}
+
+/* Maximize ↗ (diagonal arrow) */
+.tl-lights:hover .tl-maximize::before {
+  width: 5px; height: 5px;
+  border-right: 1.5px solid rgba(0,0,0,0.5);
+  border-top: 1.5px solid rgba(0,0,0,0.5);
+  transform: translate(-70%, -30%) rotate(45deg);
+}
 
 /* Unfocused window — grey all three */
 .tl-container.unfocused .tl-close,
@@ -93,7 +119,9 @@
 #desktop.dark-mode .tl-container.unfocused .tl-maximize {
   background: rgba(255,255,255,0.18) !important;
 }
-.tl-container.unfocused .tl-icon { opacity: 0 !important; }
+.tl-container.unfocused .tl-close::before,
+.tl-container.unfocused .tl-minimize::before,
+.tl-container.unfocused .tl-maximize::before { display: none !important; }
 
 /* ── Minimized dot badge on dock icon ── */
 .dock-item { position: relative !important; overflow: visible !important; }
