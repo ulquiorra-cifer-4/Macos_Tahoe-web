@@ -7,8 +7,9 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="lockscreen.css" />
   <link rel="stylesheet" href="menubar.css" />
-  <link rel="stylesheet" href="desktop.css" />
   <link rel="stylesheet" href="window-minimize.css" />
+  <link rel="stylesheet" href="menubar-apple-functions.css" />
+  <link rel="stylesheet" href="desktop.css" />
   <link rel="stylesheet" href="apps/notes/notes.css" />
   <link rel="stylesheet" href="apps/finder/finder.css" />
   <link rel="stylesheet" href="apps/photos/photos.css" />
@@ -29,9 +30,6 @@
 
   <script src="lockscreen.js"></script>
   <script src="window-manager.js"></script>
-
-  <!-- Minimize patch — load right after window-manager -->
-  <script src="window-minimize.js"></script>
 
   <!-- Finder -->
   <script src="apps/finder/finder-icons.js"></script>
@@ -87,6 +85,9 @@
   <!-- Menubar + Dock -->
   <script src="menubar.js"></script>
   <script src="dock.js"></script>
+
+  <!-- Apple menu functions — must load AFTER menubar.js -->
+  <script src="menubar-apple-functions.js"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
