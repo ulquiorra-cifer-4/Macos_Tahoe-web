@@ -1,0 +1,283 @@
+/* ============================================================
+   menubar-apple-functions.css
+   About This Mac window + Sleep + Shutdown overlays
+   ============================================================ */
+
+/* ══════════════════════════════════════
+   ABOUT THIS MAC
+   ══════════════════════════════════════ */
+.atm-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.atm-window {
+  width: 520px;
+  background: rgba(248,247,244,0.97);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.18),
+    0 24px 70px rgba(0,0,0,0.50);
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+  position: relative;
+  animation: atm-pop 240ms cubic-bezier(0.34,1.4,0.64,1) both;
+}
+@keyframes atm-pop {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Traffic lights */
+.atm-tl {
+  position: absolute;
+  top: 13px; left: 14px;
+  display: flex; gap: 7px;
+  z-index: 10;
+}
+.atm-tl-btn {
+  width: 12px; height: 12px;
+  border-radius: 50%; border: none; cursor: pointer;
+}
+.atm-close { background: #ff5f57; }
+.atm-close:hover { filter: brightness(0.85); }
+.atm-min   { background: #febc2e; }
+.atm-max   { background: #28c840; }
+
+/* Tabs */
+.atm-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 42px 0 0;
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  background: rgba(240,238,234,0.96);
+}
+.atm-tab {
+  padding: 8px 22px;
+  background: none; border: none;
+  font-size: 13px; font-weight: 500;
+  color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 100ms, border-color 100ms;
+  font-family: -apple-system, sans-serif;
+}
+.atm-tab:hover  { color: rgba(0,0,0,0.75); }
+.atm-tab.active { color: #1c1c1e; border-bottom-color: #0a84ff; font-weight: 600; }
+
+/* Panels */
+.atm-panel { padding: 24px 32px 20px; }
+
+/* ── System panel ── */
+.atm-mac-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.atm-macbook-svg { filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
+.atm-mac-name {
+  font-size: 18px; font-weight: 700; color: #1c1c1e;
+}
+.atm-mac-sub {
+  font-size: 12px; color: rgba(0,0,0,0.45);
+}
+
+.atm-specs-grid {
+  display: flex; flex-direction: column;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  margin-bottom: 18px;
+}
+.atm-spec-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.7);
+  border-bottom: 0.5px solid rgba(0,0,0,0.07);
+}
+.atm-spec-row:last-child { border-bottom: none; }
+.atm-spec-label {
+  width: 140px; flex-shrink: 0;
+  font-size: 12px; font-weight: 600;
+  color: rgba(0,0,0,0.5);
+}
+.atm-spec-val {
+  font-size: 12px; color: #1c1c1e;
+}
+
+/* ── User panel ── */
+.atm-user-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.atm-avatar-wrap {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a84ff, #30d158);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: filter 120ms;
+}
+.atm-avatar-wrap:hover { filter: brightness(0.88); }
+.atm-avatar-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  position: absolute; inset: 0;
+}
+.atm-avatar-initials {
+  font-size: 28px; font-weight: 700; color: #fff;
+  letter-spacing: 1px;
+}
+.atm-avatar-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; opacity: 0;
+  transition: opacity 120ms;
+}
+.atm-avatar-wrap:hover .atm-avatar-overlay { opacity: 1; }
+.atm-avatar-hint {
+  font-size: 11px; color: rgba(0,0,0,0.38);
+}
+
+.atm-user-fields {
+  display: flex; flex-direction: column;
+  gap: 10px; margin-bottom: 18px;
+}
+.atm-field-row {
+  display: flex; align-items: center; gap: 12px;
+}
+.atm-field-label {
+  width: 90px; flex-shrink: 0;
+  font-size: 12px; font-weight: 600;
+  color: rgba(0,0,0,0.5); text-align: right;
+}
+.atm-field-input {
+  flex: 1; padding: 6px 10px;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 7px;
+  background: rgba(255,255,255,0.85);
+  font-size: 13px; color: #1c1c1e;
+  font-family: -apple-system, sans-serif;
+  outline: none;
+  transition: border-color 100ms, box-shadow 100ms;
+}
+.atm-field-input:focus {
+  border-color: #0a84ff;
+  box-shadow: 0 0 0 2px rgba(10,132,255,0.22);
+}
+
+/* Footer button row */
+.atm-footer-btn-row {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: center;
+}
+.atm-footer-btn {
+  padding: 6px 16px; border-radius: 7px;
+  background: rgba(0,0,0,0.07);
+  border: 0.5px solid rgba(0,0,0,0.12);
+  font-size: 12.5px; font-family: -apple-system, sans-serif;
+  cursor: pointer; color: #1c1c1e;
+  transition: background 100ms;
+}
+.atm-footer-btn:hover { background: rgba(0,0,0,0.12); }
+.atm-save-btn { background: rgba(10,132,255,0.12); color: #0a84ff; border-color: rgba(10,132,255,0.25); }
+.atm-save-btn:hover { background: rgba(10,132,255,0.2); }
+.atm-save-status { font-size: 12px; font-weight: 500; }
+
+/* Dark mode */
+#desktop.dark-mode .atm-window       { background: rgba(30,30,32,0.97); }
+#desktop.dark-mode .atm-tabs          { background: rgba(28,28,30,0.96); border-color: rgba(255,255,255,0.08); }
+#desktop.dark-mode .atm-tab           { color: rgba(255,255,255,0.45); }
+#desktop.dark-mode .atm-tab.active    { color: #f5f5f7; border-bottom-color: #0a84ff; }
+#desktop.dark-mode .atm-mac-name      { color: #f5f5f7; }
+#desktop.dark-mode .atm-spec-row      { background: rgba(44,44,46,0.7); border-color: rgba(255,255,255,0.06); }
+#desktop.dark-mode .atm-spec-val      { color: #f5f5f7; }
+#desktop.dark-mode .atm-field-input   { background: rgba(44,44,46,0.85); border-color: rgba(255,255,255,0.14); color: #f5f5f7; }
+#desktop.dark-mode .atm-footer-btn    { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); color: #f5f5f7; }
+
+/* ══════════════════════════════════════
+   SLEEP OVERLAY
+   ══════════════════════════════════════ */
+.sys-sleep-overlay {
+  position: absolute; inset: 0;
+  background: #000;
+  opacity: 0;
+  z-index: 9900;
+  cursor: none;
+}
+
+/* ══════════════════════════════════════
+   SHUTDOWN OVERLAY
+   ══════════════════════════════════════ */
+.sys-shutdown-overlay {
+  position: absolute; inset: 0;
+  background: #1a1a1a;
+  opacity: 0;
+  z-index: 9900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 1s ease;
+}
+.sys-sd-content {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 14px;
+  color: #fff;
+}
+.sys-sd-apple { opacity: 0.9; }
+.sys-sd-text {
+  font-size: 17px; font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  font-family: -apple-system, sans-serif;
+  letter-spacing: 0.2px;
+}
+.sys-sd-sub {
+  font-size: 13px; color: rgba(255,255,255,0.4);
+  font-family: -apple-system, sans-serif;
+}
+.sys-sd-hint {
+  position: absolute;
+  bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px; color: rgba(255,255,255,0.25);
+  font-family: -apple-system, sans-serif;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════
+   FORCE QUIT TOAST
+   ══════════════════════════════════════ */
+.mb-sys-toast {
+  position: absolute;
+  bottom: 110px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(28,28,30,0.88);
+  color: #fff;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: 20px;
+  pointer-events: none; opacity: 0;
+  z-index: 9800;
+  transition: opacity 220ms ease, transform 220ms ease;
+  font-family: -apple-system, sans-serif;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
